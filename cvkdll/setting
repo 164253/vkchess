@@ -1,0 +1,6 @@
+使用mingw-w64 gcc8.1默認編譯C11
+編譯參數gcc -fPIC -s -shared -o cvkdll0.1.7.dll cvkdll0.1.7.c
+源碼為 cvkdll(版本).c
+依賴 無
+win10-64bit下有效執行檔為 cvkdll(版本).dll
+需要so者可在linux下自行編譯
