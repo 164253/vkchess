@@ -1,0 +1,11 @@
+使用cpython3.10.5-64bit
+源碼為 cvkpy(版本).py
+依賴{
+  pygame
+  os.path.dirname 用來引入各種圖片
+  ctypes 引入cvkdll
+  還有一大堆.png跟一個.ico
+  打包時要用到的全部依賴檔案和打包參數寫在cvkpy(版本)spec.txt
+}
+win10-64bit下有效執行檔為 cvkdll(版本).dll
+需要so者可在linux下自行編譯
