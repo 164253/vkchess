@@ -77,8 +77,8 @@ linewd=bdone//128 or 1
 screen=pygame.display.set_mode((scwd,schi))
 pygame.display.set_caption("科摩多龍棋")
 dir=dirname(__file__)
-cdllclick=CDLL(dir+"\\cvkdll0.1.7.dll").cdllclick
-cdllundo=CDLL(dir+"\\cvkdll0.1.7.dll").cdllundo
+cdllclick=CDLL(dir+"\\cvkso0.1.7.so").cdllclick
+cdllundo=CDLL(dir+"\\cvkso0.1.7.so").cdllundo
 icon=pygame.image.load(dir+"\\vkImage1_1.png")
 first=pygame.transform.scale(pygame.image.load(dir+"\\first.png").convert(),bdonet)
 second=pygame.transform.scale(pygame.image.load(dir+"\\second.png").convert(),bdonet)
