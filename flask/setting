@@ -1,5 +1,5 @@
 使用cpython3.9.5
-在pythonanywhere的運行環境ubuntu20.04.2下有效
+無可用伺服器確認有效性
 源碼為 board(版本).py
 依賴{
   pygame
