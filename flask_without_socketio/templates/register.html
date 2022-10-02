@@ -1,0 +1,32 @@
+{% set dir="static/" -%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="shortcut icon" href='{{dir+"favicon.ico"}}'>
+        <title>科摩多龍棋註冊</title>
+        <script>
+            "use strict";
+            let inputVerity=form=>{
+                let str="",flag=true;
+                if(!(/[a-zA-Z0-9]{6,20}/.test(form["username"].value))){str+="用戶名僅能包含大小不拘英數且長度需在6~20.\n";flag=false;}
+                if(!(/[a-zA-Z0-9]{6,20}/.test(form["password"].value))){str+="密碼僅能包含大小不拘英數且長度需在6~20.";flag=false;}
+                if(str)alert(str);
+                return flag;
+            }
+        </script>
+    </head>
+    <body>
+        <img src='{{dir+"logo.png"}}' style="width:10%; position:absolute; left:40%; top:30%;">
+        <div style="position:absolute; left:60%; top:30%;">
+            <form method="post" action="{{url_for('register')}}" onsubmit="return inputVerity(this)">
+                <p style="font-size:2em; margin:0;">註冊頁面</p><br>
+                帳&emsp;&emsp;號：<input type="text" name="username"><br>
+                密&emsp;&emsp;碼：<input type="password" name="password"><br>
+                確認密碼：<input type="password" name="password_check"><br>
+                <input type="submit" value="註冊" name="submit"><br>
+                <a href="{{url_for('login')}}">已有帳號？登入點我</a>
+            </form>
+        </div>
+    </body>
+</html>

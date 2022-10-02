@@ -1,0 +1,25 @@
+{% set dir="./static/" -%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src='{{dir+"main_screen.js"}}'></script>
+        <link rel="shortcut icon" href='{{dir+"favicon.ico"}}'>
+        <title>科摩多龍棋 等待頁面</title>
+        <style>.pa{position:absolute;}</style>
+        <script>
+            let wait_play2_second={{wait_time}};
+            $("#wait_play2_div").css("display","block");
+            setInterval("++wait_play2_second;$('#wait_play2_p').html(`等待中 ${wait_play2_second}秒`);",1000);
+            setInterval("window.location.href='play2'",10000);
+        </script>
+    </head>
+    <body>
+        房間號{{game_room}}
+        <div>
+            <div id="wait_play2_div" class="pa" style="display:block;height:10%;left:2.5%;top:87.5%;font-size:24px;opacity:0.3;background-color:black;">
+            <p id="wait_play2_p" style="color:white;"></p>
+        </div>
+    </body>
+</html>

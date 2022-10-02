@@ -1,0 +1,24 @@
+{% set dir="static/" -%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src='{{dir+"main_screen.js"}}'></script>
+        <link rel="shortcut icon" href='{{dir+"favicon.ico"}}'>
+        <title>科摩多龍棋</title>
+        <style>.pa{position:absolute;}</style>
+    </head>
+    <body style="height:100%;">
+        <div class="pa" style="height:5%;left:2.5%; top:2.5%; font-size:24px;">
+            <img src='{{dir+"logo.png"}}' style="height:100%;">{{session['user_name']}}
+        </div>
+        <img src='{{dir+"main_char.png"}}' class="pa" style="height:87.5%; left:2.5%; top:10%;">
+        <img src='{{dir+"home.png"}}' id="btn1" class="pa" style="height:20%; right:10%; top:10%;">
+        <img src='{{dir+"lotto.png"}}' id="btn2" class="pa" style="height:20%; right:10%; top:40%;">
+        <img src='{{dir+"start_game.png"}}' id="btn3" class="pa" style="height:20%; right:10%; top:70%;" onclick="start_game_btn_onclick()">
+        <!--<img src='{{dir+"setting.png"}}' class="pa" style="width:5%; left:92.5%; top:2.5%" onclick="open_setting">-->
+        <a href="{{url_for('logout')}}" class="pa" style="width:5%; left:92.5%; top:2.5%;">登出</a>
+    </body>
+</html>

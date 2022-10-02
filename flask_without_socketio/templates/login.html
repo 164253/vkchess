@@ -1,0 +1,20 @@
+{% set dir="static/" -%}
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="shortcut icon" href='{{dir+"favicon.ico"}}'>
+        <title>科摩多龍棋登入</title>
+    </head>
+    <body>
+        <img src='{{dir+"logo.png"}}' style="width:10%; position:absolute; left:40%; top:30%;">
+        <div style="position:absolute; left:60%; top:30%;">
+            <form method="post" action="{{url_for('login')}}">
+                <p style="font-size:2em; margin:0;">登入頁面</p>
+                帳號：<input type="text" name="username"><br>
+                密碼：<input type="password" name="password"><br>
+                <input type="submit" value="登入" name="submit"><br>
+                <a href="{{url_for('register')}}">沒有帳號？註冊點我</a>
+            </form>
+        </div>
+    </body>
+</html>
