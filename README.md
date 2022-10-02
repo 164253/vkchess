@@ -12,31 +12,31 @@
 底下為現有程式碼介紹  
 各目錄下都會有講述建構與依賴的setting文檔  
 還有一個版本更新的version檔  
-/cvkc  
+/cvkc 娛樂+最小化性質測試的  
 使用c語言編寫 一檔即完成全部功能 輸出採用stdout  
-/cvkdll  
+/cvkdll 單機和網頁的內核 最常用  
 使用c語言編寫 一樣是一檔完成 雖然名字叫dll但其實編譯成so不會有語法問題  
 因為我使用win10-64bit所以沒編so 有需要可以直接使用setting中的編譯方式自行生成  
-/cvkpy  
+/cvkpy 現行最常用的單機版  
 使用python 並用ctypes引入cvkdll得到結果後顯示  
-/flask  
+/flask 新的網頁版 但是沒伺服器能用  
 使用python-flask以及socketio 然後加上cvkdll 是人類現在的希望(  
 還在等待google cloud或別的免費支援socketio的伺服器  
-/flask_without_socketio  
+/flask_without_socketio 現行最常用的網頁版  
 使用python-flask加上cvkdll 由於用了一堆ajax再加長輪巡 是真實的效能毀滅者(  
-/jsvk  
+/jsvk 廢棄版本  
 將cvkc轉為js並加上pyvk的畫面顯示的js版 是剛開始網頁環境測試的時候弄的  
 好處是瀏覽器就能跑 但相對不能用來實作於網站  
-/phpvk  
+/phpvk 廢棄版本  
 因為不知道為甚麼寫出來的(  
 是jsvk換成php的版本 避免了更改原代碼的問題 但是真的很慢  
 是目前唯一還有bug不能跑的版本  
-/pyvk  
+/pyvk 舊單機版 因為能上一步所以還是廣泛使用  
 純python 最一開始的版本 構建了後來所有版本的基礎  
 因為效能問題才轉為cvkpy版 曾試著用cython但發現gui會很麻煩 所以暫時放著了  
 未來某天會再重新優化的  
-/javavk(名稱未定)  
-新路線 為了android而開始的 雖然也有其他實現方式 不過就是會想是一下用kotlin寫嘛(  
+/javavk(名稱未定) 製作中  
+新路線 為了android而開始的 雖然也有其他實現方式 不過就是會想試一下用kotlin寫嘛(  
 
 後記  
 關於檔案的發展史  
