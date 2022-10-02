@@ -1,0 +1,11 @@
+使用cpython3.10.5-64bit
+在win10-64bit有效
+源碼為 pyvk(版本).py
+依賴{
+  pygame
+  os.path.dirname 用來引入各種圖片
+  ctypes 引入cvkso
+  image\一大堆.png
+  一個.ico
+  打包時要用到的全部依賴檔案和打包參數寫在pyvk(版本)spec.txt
+}
