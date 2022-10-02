@@ -1,0 +1,26 @@
+{% set dir="./static/" -%}
+{% set img=dir+"image/" -%}
+{% set avatar=img -%}<!--這個頭像路徑等上傳系統有了再用-->
+<!DOCTYPE html>
+<html style="height:100%;">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <script>let ischange={{rev}},play_mode=2</script>
+        <script src="{{dir+'board.js'}}"></script>
+        <link rel="shortcut icon" href='{{dir+"favicon.ico"}}'>
+        <style>.pa{position:absolute;user-select:none;}.c{display:none;}.b{display:none;}.z2{z-index:2;}.z3{z-index:3;}</style>
+    </head>
+    <body class="pa" draggable="false" style="width:98%; height:98%;" onclick="bdcli(event.pageX,event.pageY)">
+        <img id="spImg" draggable="false" class="pa" src='{{avatar+u1img}}'><!--後手玩家頭像-->
+        <p id="spP" class="pa">{{u1}}</p>
+        <img id="fpImg" draggable="false" class="pa" src='{{avatar+u2img}}'><!--先手玩家頭像-->
+        <p id="fpP" class="pa">{{u2}}</p>
+        <img id="quickc" draggable="false" class="pa" src='{{img+"boardline.png"}}'>
+        <img id="changeImg" draggable="false" class="pa" src='{{img+"change.png"}}'>
+        <img id="undoImg" draggable="false" class="pa" src='{{img+"undo.png"}}'>
+        <script>boardInit();</script>
+    </body>
+</html>
