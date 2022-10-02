@@ -11,8 +11,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO,emit,join_room,leave_room
 from ctypes import CDLL,c_uint16,byref
 from os.path import dirname
-# cdllclick=CDLL(dirname(__file__)+"/static/cvkso0.1.7.so").cdllclick
-cdllclick=CDLL(dirname(__file__)+"/static/cvkdll0.1.7.dll").cdllclick
+cdllclick=CDLL(dirname(__file__)+"/static/cvkso0.1.7.so").cdllclick
+# cdllclick=CDLL(dirname(__file__)+"/static/cvkdll0.1.7.dll").cdllclick
 app=Flask(__name__)
 app.secret_key='AngaNganG'
 app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///test.db"
