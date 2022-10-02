@@ -1,0 +1,1 @@
+let formcli=()=>alert("username:"+$("#username").val()+",password:"+$("#password").val());

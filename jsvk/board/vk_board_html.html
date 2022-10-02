@@ -1,0 +1,20 @@
+<!--2022/5/4-->
+<!DOCTYPE html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<html style="height:100%;">
+    <head>
+        <meta charset="utf-8">
+        <title>科摩多龍棋</title>
+        <script src="jsvk_0.1.js"></script>
+        <script src="vk_board_js.js"></script>
+        <link rel="stylesheet" type="text/css" href="vk_board_css.css">
+    </head>
+    <body class="pa" draggable="false" style="width:98%; height:98%;" onclick="bdcli(event.pageX,event.pageY)">
+        <img id="spImg" draggable="false" class="pa">
+        <p id="spP" class="pa">未讀取到名字</p>
+        <img id="fpImg" draggable="false" class="pa">
+        <p id="fpP" class="pa">未讀取到名字</p>
+        <img id="quickc" draggable="false" class="pa">
+        <script>boardInit();</script>
+    </body>
+</html>

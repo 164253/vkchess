@@ -1,0 +1,46 @@
+<!--2022/5/9-->
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script> -->
+<!DOCTYPE html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- <html>
+    <head>
+        <meta charset="utf-8">
+        <title>科摩多龍棋 登陸或註冊</title>
+    </head>
+    <body>
+        <form action="login_php.php" method="post" name="form" id="form" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:180%;">
+            <img src="logo.png" style="position:absolute; transform:translate(-110%,-25%); width:150%;">
+            用戶名:<input type="text" name="username" id="username" style="position:absolute; left:105%; font-size:100%; width:300%;"><br>
+            密碼&nbsp;&nbsp;&nbsp;&nbsp;:<input type="password" name="password" id="password" style="position:absolute; left:105%; font-size:100%; width:300%;"><br>
+            <input type="submit" name="submit" value="送出" style="position:absolute; font-size:70%; right:-300%;">
+        </form>
+    </body>
+    <script src="login_js.js"></script>
+</html> -->
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>科摩多龍棋註冊</title>
+    <script>
+        let inputVerity=form=>{
+            let pw=form["password"].value,str="",flag=true;
+            if(!form["username"].value){str+="用戶名不能為空. ";flag=false;}
+            if(pw.length<6||20<pw.length){str+="密碼長度需在6~20. ";flag=false;}
+            if(pw!=form["password_check"].value){str+="請確認密碼是否輸入正確. ";flag=false;}
+            if(str)alert(str);
+            return flag;
+        }
+    </script>
+    </head>
+    <body>
+        <form style="position:absolute; left:60%; top:30%;" method="post" action="register_php.php" onsubmit="return inputVerity(this)">
+            <h1>註冊頁面</h1><br>
+            帳&emsp;&emsp;號：<input type="text" name="username"><br>
+            密&emsp;&emsp;碼：<input type="password" name="password" id="password"><br>
+            確認密碼：<input type="password" name="password_check" id="password_check"><br>
+            <input type="submit" value="註冊" name="submit">
+        </form>
+    </body>
+</html>
+<!-- 用戶名:<?php echo $_POST["username"];?><br>
+密碼:<?php echo $_POST["password"];?> -->
