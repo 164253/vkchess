@@ -1,6 +1,6 @@
 使用cpython3.9.5
 在pythonanywhere的運行環境ubuntu20.04.2下有效
-源碼為 cvkpy(版本).py
+源碼為 board(版本).py
 依賴{
   pygame
   os.path.dirname 用來引入各種圖片
