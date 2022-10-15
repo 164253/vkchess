@@ -70,7 +70,7 @@ let bdcli=(x,y)=>{
                     if(y%bdone<bdone/2)nm|=0x80;
                     if(m[81]&16)nm^=0x80;
                     if(ischange){
-                        nm=80-(nm&0x7f);
+                        nm=(nm&0x80)+80-(nm&0x7f);
                         nm^=0x80;
                     }
                     socket.emit('click'+play_mode,(nm).toString());
