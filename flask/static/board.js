@@ -1,11 +1,33 @@
-//2022/9/9
+//2022/10/16
 let int=i=>parseInt(i);
 let bdone=int(Math.min(window.innerWidth,window.innerHeight)/13*0.9);
 let dist_wd=int((window.innerWidth-bdone*9)/2),dist_hi=int((window.innerHeight-bdone*9)/2);
 let dir="./static/image/";
 let m;
+let born=()=>{
+    if(m[81]&4){
+        if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
+        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
+    }
+}
+let unborn=()=>{
+    if(~m[81]&4)for(let i=1;i^11;++i){
+        $(`#bs${i}`).css("display","none");$(`#bsg${i}`).css("display","none");
+        $(`#bf${i}`).css("display","none");$(`#bfg${i}`).css("display","none");
+    }
+}
 let socket = io.connect();
-socket.on('return_click'+play_mode,function(r){console.log('is right?');m=r.split(',').map(Number);output();});
+socket.on('return_click'+play_mode,r=>{
+    m=r.split(',').map(Number);
+    if(m[81]&4){
+        if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
+        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
+    }
+    if(~m[81]&4)for(let i=1;i^11;++i){
+        $(`#bs${i}`).css("display","none");$(`#bsg${i}`).css("display","none");
+        $(`#bf${i}`).css("display","none");$(`#bfg${i}`).css("display","none");
+    }
+    output();});
 let change=()=>{
     $("#fpP").html([$("#spP").html(),$("#spP").html($("#fpP").html())][0]);
     $("#fpImg").attr("src",[$("#spImg").attr("src"),$("#spImg").attr("src",$("#fpImg").attr("src"))][0]);
