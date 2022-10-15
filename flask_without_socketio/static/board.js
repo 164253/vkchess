@@ -1,10 +1,26 @@
-//2022/9/9
+//2022/10/16
 let int=i=>parseInt(i);
 let bdone=int(Math.min(window.innerWidth,window.innerHeight)/13*0.9);
 let dist_wd=int((window.innerWidth-bdone*9)/2),dist_hi=int((window.innerHeight-bdone*9)/2);
 let dir="./static/image/";
 let m;
-let getm=nm=>{$.ajax({url:"/click"+play_mode+"?nm="+nm,success:r=>{m=r.split(',').map(Number);output();}})};
+let born=()=>{
+    if(m[81]&4){
+        if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
+        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
+    }
+}
+let unborn=()=>{
+    if(~m[81]&4)for(let i=1;i^11;++i){
+        $(`#bs${i}`).css("display","none");$(`#bsg${i}`).css("display","none");
+        $(`#bf${i}`).css("display","none");$(`#bfg${i}`).css("display","none");
+    }
+}
+let getm=(nm,func)=>{
+    $.ajax({
+        url:"/click"+play_mode+"?nm="+nm,
+        success:r=>{
+            m=r.split(',').map(Number);func();output();}})};
 let change=()=>{
     $("#fpP").html([$("#spP").html(),$("#spP").html($("#fpP").html())][0]);
     $("#fpImg").attr("src",[$("#spImg").attr("src"),$("#spImg").attr("src",$("#fpImg").attr("src"))][0]);
@@ -31,12 +47,12 @@ let bdcli=(x,y)=>{
                 if(m[81]>>3&1^ischange){
                     x=int(x-dist_wd+0.5*bdone);
                     y=int(y-dist_hi+1.5*bdone);
-                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(10-int(x/bdone));
+                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(10-int(x/bdone),unborn);
                 }
                 else{
                     x=int(x-dist_wd+0.5*bdone);
                     y=int(y-dist_hi-9.5*bdone);
-                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(1+int(x/bdone));
+                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(1+int(x/bdone),unborn);
                 }
             }
             else{
@@ -50,9 +66,13 @@ let bdcli=(x,y)=>{
                         nm=80-(nm&0x7f);
                         nm^=0x80;
                     }
-                    getm(nm);
+                    getm(nm,born);
                 }
             }
+        }
+        if(m[81]&4){
+            if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
+            else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
         }
     }
 }
@@ -73,17 +93,17 @@ let boardInit=()=>{
         }
     }
     for(i=11;--i;){
-        $(document.body).append(`<img id='bf${i}' src='${dir}${i}1.png' class='b z3' style='top:${dist_hi+bdone*9.5}px; left:${dist_wd+bdone*(i-1.5)}px; width:${bdone}px;'>`);
-        $(document.body).append(`<img id='bs${i}' src='${dir}${i}2.png' class='b z3' style='top:${dist_hi-bdone*1.5}px; left:${dist_wd+bdone*(9.5-i)}px; width:${bdone}px;'>`);
-        $(document.body).append(`<img id='bfg${i}' src="${dir}c000.png" class='b z2' style='top:${dist_hi+bdone*9.5}px; left:${dist_wd+bdone*(i-1.5)}px; width:${bdone}px;'>`);
-        $(document.body).append(`<img id='bsg${i}' src="${dir}c000.png" class='b z2' style='top:${dist_hi-bdone*1.5}px; left:${dist_wd+bdone*(9.5-i)}px; width:${bdone}px;'>`);
+        $(document.body).append(`<img id='bf${i}' src='${dir}${i}1.png' class='b z3' style='display:none; top:${dist_hi+bdone*9.5}px; left:${dist_wd+bdone*(i-1.5)}px; width:${bdone}px;'>`);
+        $(document.body).append(`<img id='bs${i}' src='${dir}${i}2.png' class='b z3' style='display:none; top:${dist_hi-bdone*1.5}px; left:${dist_wd+bdone*(9.5-i)}px; width:${bdone}px;'>`);
+        $(document.body).append(`<img id='bfg${i}' src="${dir}c000.png" class='b z2' style='display:none; top:${dist_hi+bdone*9.5}px; left:${dist_wd+bdone*(i-1.5)}px; width:${bdone}px;'>`);
+        $(document.body).append(`<img id='bsg${i}' src="${dir}c000.png" class='b z2' style='display:none; top:${dist_hi-bdone*1.5}px; left:${dist_wd+bdone*(9.5-i)}px; width:${bdone}px;'>`);
     }
     for(i=8;i--;)$(document.body).append(`<img id='l${i}' src='${dir}-1${int(1+i/4)}.png' class='z3' style='top:${dist_hi+bdone*(15/4+int(i/4))}px; left:${dist_wd+bdone*(12*(i&2)+((i&1)<<3)|1)/4}px; width:${bdone/2}px;'>`);
     $("#l4").css("display","none");
     $("img").attr("draggable","false");
     $("img").addClass("pa");
-    getm(81);
-    if(play_mode==2)setInterval("getm(81)",10000);
+    getm(81,()=>{});
+    if(play_mode==2)setInterval("getm(81,()=>{}))",10000);
 }
 let output=()=>{
     let p,i,k;
