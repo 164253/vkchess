@@ -26,8 +26,8 @@ let change=()=>{
 };
 let bdcli=(x,y)=>{
     if(-1.5*bdone+dist_wd<x&&x<-0.5*bdone+dist_wd&&6.5*bdone+dist_hi<y&&y<7.5*bdone+dist_hi){
-        change();
         ischange=!ischange;
+        change();
         output();
     }
     else{
