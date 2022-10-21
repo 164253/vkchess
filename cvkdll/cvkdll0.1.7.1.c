@@ -1,4 +1,4 @@
-//6/23 0.1.7
+//10/21 0.1.7.1
 /*未完成*/
 /*definition of structs and functions
 struct sMap{U C b:2,me:2,p:1,e:1,up:5,down:5}*(m+83) m[83];
@@ -256,7 +256,7 @@ V ss(){
     else{
         if(*(m+w)&0x400)l^=eta[we(td,w-s)]&ar(w,s);//appleDel
         if(*(m+w)&0x2000){//吃
-            if(pf(w,s))*(m+w)&=0x3fc0;//wb=wu=wd=0
+            if(pf(w,s))*(m+w)&=0x3c00;//wb=wu=wd=0
             else{
                 *(m+w)=(*(m+w)&0x3c00)|td|(t+1<<14);//wb=t+1,wd=td,wu=0
                 if(*(m+s)&0x3e0
