@@ -285,7 +285,10 @@ V sp(){
     c|=((*(m+s)>>5&0x1f)==1)<<30;
     if(pf(w,s))*(m+s)&=0x3c00;
     if(ft(w,s))*(m+w)&=0x3c00;
-    if(c&0x40000000)*(m+81)|=4|c>>31<<3;
+    if(c&0x40000000){
+        if(t){if(!(*(m+4)&0x4000)&&!(*(m+4)&0x3e0))*(m+81)|=4|c>>31<<3;}//if(後手)if(*(m+4).b!=1&&*(m+4).up空)born()
+        else if(!(*(m+76)&0x8000)&&!(*(m+76)&0x3e0))*(m+81)|=4|c>>31<<3;//else if(*(m+76).b!=2&&*(m+76).up空)born()
+    }
     c&=0xbfffffff;
 }
 U short int* cdllclick(U short int*p,U short int nm){
