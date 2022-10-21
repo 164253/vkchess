@@ -206,7 +206,7 @@ void second_set(){
             l^=eat_the_apple[td^7?(we<0?we%10?we%9?we%8?3:2:1:0:we%10?we%9?we%8?4:5:6:7):t?(we%9^1?5:7):we%9^-1?2:0]&apple_range(w,s);//appleDel
         }
         if(map[w]&0x2000){//吃
-            if(poison_frog(w,s))map[w]&=0x3fc0;//wb=wu=wd=0
+            if(poison_frog(w,s))map[w]&=0x3c00;//wb=wu=wd=0
             else{
                 map[w]=(map[w]&0x3c00)|td|(t+1<<14);//wb=t+1,wd=td,wu=0
                 if(map[s]&0x3e0
