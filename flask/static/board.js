@@ -5,42 +5,23 @@ let dist_wd=int((window.innerWidth-bdone*9)/2),dist_hi=int((window.innerHeight-b
 let dir="./static/image/";
 let m;
 let born=()=>{
-    if(m[81]&4){
-        if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
-        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
-    }
-}
-let unborn=()=>{
-    if(~m[81]&4)for(let i=1;i^11;++i){
+    for(let i=1;i^11;++i){
         $(`#bs${i}`).css("display","none");$(`#bsg${i}`).css("display","none");
         $(`#bf${i}`).css("display","none");$(`#bfg${i}`).css("display","none");
+    }
+    if(m[81]&4){
+        if(m[81]>>3&1^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
+        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
     }
 }
 let socket = io.connect();
 socket.on('return_click'+play_mode,r=>{
     m=r.split(',').map(Number);
-    if(m[81]&4){
-        if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
-        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
-    }
-    if(~m[81]&4)for(let i=1;i^11;++i){
-        $(`#bs${i}`).css("display","none");$(`#bsg${i}`).css("display","none");
-        $(`#bf${i}`).css("display","none");$(`#bfg${i}`).css("display","none");
-    }
-    output();});
+    born();output();});
 let change=()=>{
     $("#fpP").html([$("#spP").html(),$("#spP").html($("#fpP").html())][0]);
     $("#fpImg").attr("src",[$("#spImg").attr("src"),$("#spImg").attr("src",$("#fpImg").attr("src"))][0]);
-    if(m[81]&4){
-        if(m[81]>>3&1^ischange)for(let i=10;i;--i){
-            $(`#bs${i}`).css("display",[$(`#bf${i}`).css("display"),$(`#bf${i}`).css("display",$(`#bs${i}`).css("display"))][0]);
-            $(`#bsg${i}`).css("display",[$(`#bfg${i}`).css("display"),$(`#bfg${i}`).css("display",$(`#bsg${i}`).css("display"))][0]);
-        }
-        else for(let i=10;i;--i){
-            $(`#bf${i}`).css("display",[$(`#bs${i}`).css("display"),$(`#bs${i}`).css("display",$(`#bf${i}`).css("display"))][0]);
-            $(`#bfg${i}`).css("display",[$(`#bsg${i}`).css("display"),$(`#bsg${i}`).css("display",$(`#bfg${i}`).css("display"))][0]);
-        }
-    }
+    born();
 };
 let bdcli=(x,y)=>{
     if(-1.5*bdone+dist_wd<x&&x<-0.5*bdone+dist_wd&&6.5*bdone+dist_hi<y&&y<7.5*bdone+dist_hi){
