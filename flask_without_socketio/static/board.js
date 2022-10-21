@@ -1,39 +1,28 @@
-//2022/10/16
+//2022/10/21
 let int=i=>parseInt(i);
 let bdone=int(Math.min(window.innerWidth,window.innerHeight)/13*0.9);
 let dist_wd=int((window.innerWidth-bdone*9)/2),dist_hi=int((window.innerHeight-bdone*9)/2);
 let dir="./static/image/";
 let m;
 let born=()=>{
-    if(m[81]&4){
-        if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
-        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
-    }
-}
-let unborn=()=>{
-    if(~m[81]&4)for(let i=1;i^11;++i){
+    for(let i=1;i^11;++i){
         $(`#bs${i}`).css("display","none");$(`#bsg${i}`).css("display","none");
         $(`#bf${i}`).css("display","none");$(`#bfg${i}`).css("display","none");
     }
+    if(m[81]&4){
+        if(m[81]>>3&1^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
+        else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
+    }
 }
-let getm=(nm,func)=>{
+let getm=(nm)=>{
     $.ajax({
         url:"/click"+play_mode+"?nm="+nm,
         success:r=>{
-            m=r.split(',').map(Number);func();output();}})};
+            m=r.split(',').map(Number);born();output();}})};
 let change=()=>{
     $("#fpP").html([$("#spP").html(),$("#spP").html($("#fpP").html())][0]);
     $("#fpImg").attr("src",[$("#spImg").attr("src"),$("#spImg").attr("src",$("#fpImg").attr("src"))][0]);
-    if(m[81]&4){
-        if(m[81]>>3&1^ischange)for(let i=10;i;--i){
-            $(`#bs${i}`).css("display",[$(`#bf${i}`).css("display"),$(`#bf${i}`).css("display",$(`#bs${i}`).css("display"))][0]);
-            $(`#bsg${i}`).css("display",[$(`#bfg${i}`).css("display"),$(`#bfg${i}`).css("display",$(`#bsg${i}`).css("display"))][0]);
-        }
-        else for(let i=10;i;--i){
-            $(`#bf${i}`).css("display",[$(`#bs${i}`).css("display"),$(`#bs${i}`).css("display",$(`#bf${i}`).css("display"))][0]);
-            $(`#bfg${i}`).css("display",[$(`#bsg${i}`).css("display"),$(`#bsg${i}`).css("display",$(`#bfg${i}`).css("display"))][0]);
-        }
-    }
+    born();
 };
 let bdcli=(x,y)=>{
     if(-1.5*bdone+dist_wd<x&&x<-0.5*bdone+dist_wd&&6.5*bdone+dist_hi<y&&y<7.5*bdone+dist_hi){
@@ -47,12 +36,12 @@ let bdcli=(x,y)=>{
                 if(m[81]>>3&1^ischange){
                     x=int(x-dist_wd+0.5*bdone);
                     y=int(y-dist_hi+1.5*bdone);
-                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(10-int(x/bdone),unborn);
+                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(10-int(x/bdone));
                 }
                 else{
                     x=int(x-dist_wd+0.5*bdone);
                     y=int(y-dist_hi-9.5*bdone);
-                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(1+int(x/bdone),unborn);
+                    if(0<x&&x<10*bdone&&0<y&&y<bdone)getm(1+int(x/bdone));
                 }
             }
             else{
@@ -66,13 +55,9 @@ let bdcli=(x,y)=>{
                         nm=(nm&0x80)+80-(nm&0x7f);
                         nm^=0x80;
                     }
-                    getm(nm,born);
+                    getm(nm);
                 }
             }
-        }
-        if(m[81]&4){
-            if(m[81]&8^ischange)for(let i=10;i;--i){$(`#bs${i}`).css("display","block");$(`#bsg${i}`).css("display","block");}
-            else for(let i=10;i;--i){$(`#bf${i}`).css("display","block");$(`#bfg${i}`).css("display","block");}
         }
     }
 }
