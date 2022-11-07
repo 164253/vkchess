@@ -1,4 +1,4 @@
-#11/6 0.1
+#11/7 0.1
 '''未完成'''
 '''definition of structs and functions
 struct sMap{b:2,me:2,p:1,e:1,up:5,down:5}m[86]
@@ -127,20 +127,20 @@ def switch_dict(down):
         move(s+8,s,5)
         move(s+9,s,6)
         move(s+10,s,7)
-    if down==3:
+    elif down==3:
         move(s-10,s,0)
         move(s-8,s,2)
         move(s-1,s,3)
         move(s+1,s,4)
         move(s+8,s,5)
         move(s+10,s,7)
-    if down==4 or down==10:move(s+9,s,6) if t else move(s-9,s,1)
-    if down==5:
+    elif down==4 or down==10:move(s+9,s,6) if t else move(s-9,s,1)
+    elif down==5:
         move(s-9,s,1)
         move(s-1,s,3)
         move(s+1,s,4)
         move(s+9,s,6)
-    if down==6:
+    elif down==6:
         if t:
             for k in range(8,11):
                 i=s
@@ -155,7 +155,7 @@ def switch_dict(down):
                 while j&1:
                     j=move(i-k,i,10-k|j<<2&0x18) #所有loop mo都是先&在|
                     i-=k
-    if down==7:
+    elif down==7:
         if t:
             for k in [0,2]:
                 i=s+8+k
@@ -166,11 +166,11 @@ def switch_dict(down):
         else:
             for k in [0,2]:
                 i=s-10+k
-                j=move(s-10+k,s,k)
+                j=move(s-10+k,s,2-k)
                 while j&1:
-                    j=move(i-9,i,k|j<<2&0x18) #所有loop mo都是先&在|
+                    j=move(i-9,i,2-k|j<<2&0x18) #所有loop mo都是先&在|
                     i-=9
-    if down==8:
+    elif down==8:
         move(s-9,s,1)
         move(s+9,s,6)
         for k in [0,1]:
@@ -179,7 +179,7 @@ def switch_dict(down):
             while j&1:
                 j=move(i+1 if k else i-1,i,3+k|j<<2&0x18)
                 i+=1 if k else -1
-    if down==9 or down==18:
+    elif down==9 or down==18:
         p=m[s]&0x3e0 and ~c&0x8000 #will p
         i=s-9
         j=1
@@ -237,10 +237,10 @@ def switch_dict(down):
         while i%9:
             j=move(i,i-1,4|j<<2&0x18)
             i+=1
-    if down==17:
+    elif down==17:
         for i in range(81):
             if m[i]>>14==t+1 and s!=i:m[i]|=0x1000
-    if down==19:
+    elif down==19:
         for k1,k2 in [[-9,1],[-1,3],[1,4],[9,6]]:
             i=s
             j=1
