@@ -1,6 +1,6 @@
-#11/13 0.1
+#11/16 0.1
 '''未完成
-多動卡住了
+普通步動耳廓狐後 多動卡住了
 增加糧食危機
 增加鳳梨
 '''
@@ -337,7 +337,7 @@ def shot_poison():
 
 def ffox_calculate():
     global ffox,m
-    for i in range(81):ffox|=((m[i]&0x3e0==352)<<1|(m[i]&0x1f==11))<<(i<<1)
+    for i in range(81):ffox|=((m[i]&0x3e0==352 and m[i]>>14==2-(c>>31))<<1|(m[i]&0x1f==11 and m[i]>>14==2-(c>>31)))<<(i<<1)
 
 '''
 call_type
@@ -351,6 +351,7 @@ def pyvkcorecall(pm,papple,pffox,call_type,*args):
     m=pm
     apple=papple
     ffox=pffox
+    print(ffox,call_type,*args)
     c=m[82]<<16|m[83]
     for i in range(8):eta[i]=m[84+i]
     {-1:undo,0:click,1:born,2:ffox_click}[call_type](*args)
@@ -359,7 +360,7 @@ def pyvkcorecall(pm,papple,pffox,call_type,*args):
 def ffox_click(nm):
     global ffox,m,c
     c=c&0xffff00ff|nm<<8 #mou=nm&0xff
-    if c&0x7f==127 and m[c>>8&0x7f]>>14==(c>>31)+1:#if((tag==127(|255))&&m[mou]==t)first_set()
+    if ffox&1<<(((c>>8&0x7f)<<1)+(c>>15&1)) and c&0x7f==127 and m[c>>8&0x7f]>>14==(c>>31)+1:#if(ffox[mou]&&(tag==127(|255))&&m[mou]==t)first_set()
         if not m[c>>8&0x7f]&0x3e0:c&=0xffff7fff #if(m[mouse].up空)mouseUp=0
         reset()
         if m[c>>8&0x7f]>>(not not c&0x8000)*5&0x1f==11: #原理同[end_up],[start_up]
@@ -373,10 +374,17 @@ def ffox_click(nm):
     else:
         m[81]=m[81]&16|1
         if m[c>>8&0x7f]&0x3c00: #if(c[])second_set()
-            ffox^=1<<(((c&0x7f)<<1)+(c>>7&1))
+            print("ffox second",ffox)
+            # print("xor",2*(m[c&0x7f]&0x3e0==352),m[c&0x7f]&0x1f==11,2*(m[c&0x7f]&0x3e0==352)+(m[c&0x7f]&0x1f==11),c&0x7f,m[c&0x7f],m[c&0x7f]&0x1f,m[c&0x7f]&0x3e0)
+            ffox^=(1<<(c>>7&1))<<((c&0x7f)<<1)
+            print(ffox)
             save_ffox_up=not c&0x80 and m[c&0x7f]&0x3e0==352 and ffox>>(((c&0x7f)<<1)+1)&1
+            print(save_ffox_up)
+            print(ffox)
             second_set()
-            if save_ffox_up and m[c>>8&0x7f]&0x3e0==352:ffox|=1<<((c>>8&0x7f)<<1)+1
+            print(ffox)
+            if save_ffox_up and m[c>>8&0x7f]&0x3e0==352:ffox^=(2<<((c&0x7f)<<1))|(1<<((c>>8&0x7f)<<1)+1)
+            print(ffox)
             reset()
             if not ffox:
                 c^=0x80000000
@@ -384,8 +392,8 @@ def ffox_click(nm):
             if not (how_many_kmdl(c>>31) and how_many_kmdl(not c>>31)):m[81]=(m[81]&30)|(m[81]>>2 and not how_many_kmdl(not c>>31))
             c=c&0xffff0000|0x7f7f
             m[81]|=0x20
-            ffox_calculate()
         else:
+            print("ffox reset")
             reset()
             c=c&0xffff0000|0x7f7f
     m[82]=c>>16&0xffff
@@ -417,6 +425,9 @@ def click(nm):
             c=c&0xffffff00|0x7f
             m[81]|=0x20
             ffox_calculate()
+            if ffox:
+                c^=0x80000000
+                m[81]^=16
         elif m[c>>8&0x7f]&0x3c00: #if(c[])second_set()
             second_set()
             reset()
@@ -426,6 +437,9 @@ def click(nm):
             c=c&0xffff0000|0x7f7f
             m[81]|=0x20
             ffox_calculate()
+            if ffox:
+                c^=0x80000000
+                m[81]^=16
         else:
             reset()
             c=c&0xffff0000|0x7f7f
