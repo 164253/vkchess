@@ -1,0 +1,23 @@
+def vkclick(call_type,args*):
+
+    return {-1:undo,0:first_click,1:second_click,3:born,4:ffox_first_click,5:ffox_second_click}[call_type](*args)
+
+def undo(map,flags,apple,ffox,pre_map,pre_apple):#return call_type(always0),map,flags,apple,ffox
+
+    #此處傳入pre_map,pre_apple再傳回看似無意義
+
+    #但未來會改為傳入map和一步棋譜(pre_move) 解析後再回傳
+
+    #為了統一化undo操作才這樣寫
+
+    map=pre_map
+
+    #need flags undo
+
+    apple=pre_apple
+
+    #need ffox undo
+
+    return 0,map,flags,apple,ffox
+
+def first_click(map,flags,apple,pos):#return call_type,map,flags,apple,ffox
