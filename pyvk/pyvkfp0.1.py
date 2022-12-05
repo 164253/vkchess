@@ -44,29 +44,14 @@ def select_chess(map,eta,flags,who):
             i,j=s,1
             while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+k #所有loop mo都是先&在|
     elif who==7:
-        if t:
-            for k in [0,2]:
-                i=s+8+k
-                j=move(s+8+k,s,5+k)
-                while j&1:
-                    j=move(i+9,i,5+k|j<<2&0x18) #所有loop mo都是先&在|
-                    i+=9
-        else:
-            for k in [0,2]:
-                i=s-10+k
-                j=move(s-10+k,s,2-k)
-                while j&1:
-                    j=move(i-9,i,2-k|j<<2&0x18) #所有loop mo都是先&在|
-                    i-=9
+        for x,epa in (l[:3:2] if t else l[5::2])
+            j,i=move(s+x,s,epa),s+x
+            while j&1:j,i=move(i+9 if t else i-9,i,epa|j<<2&0x18),(i+9 if t else i-9) #所有loop mo都是先&在|
     elif who==8:
-        move(s-9,s,1)
-        move(s+9,s,6)
-        for k in [0,1]:
-            i=s
-            j=1
-            while j&1:
-                j=move(i+1 if k else i-1,i,3+k|j<<2&0x18)
-                i+=1 if k else -1
+        for x,epa in l[1]+l[6]:move(s+x,s,epa)
+        for x,epa in l[3:5]:
+            i,j=s,1
+            while j&1:j,i=move(i+x,i,epa|j<<2&0x18)
     elif who==9 or who==18:
         p=getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
         i=s-9
