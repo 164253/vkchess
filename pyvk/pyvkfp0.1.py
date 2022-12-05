@@ -53,9 +53,7 @@ def select_chess(map,eta,flags,who):
             i,j=s,1
             while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x
     elif who==9 or who==18:
-        p=getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
-        i=s-9
-        j=1
+        j,i,p=1,s-9,getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
         while i>=0:
             ap=is_apple(i+9,i)
             if ap!=8:
@@ -65,11 +63,8 @@ def select_chess(map,eta,flags,who):
                 i-=9
                 break
             i-=9
-        while i>=0:
-            j=move(i,i+9,1|j<<2&0x18)
-            i-=9
-        i=s+9
-        j=1
+        while i>=0:j,i=move(i,i+9,1|j<<2&0x18),i-9
+        i,j=s+9,1
         while i<81:
             ap=is_apple(i-9,i)
             if ap!=8:
@@ -79,11 +74,8 @@ def select_chess(map,eta,flags,who):
                 i+=9
                 break
             i+=9
-        while i<81:
-            j=move(i,i-9,6|j<<2&0x18)
-            i+=9
-        i=s-1
-        j=1
+        while i<81:j,i=move(i,i-9,6|j<<2&0x18),i+9
+        i,j=s-1,1
         while (i+1)%9:
             ap=is_apple(i+1,i)
             if ap!=8:
@@ -93,11 +85,8 @@ def select_chess(map,eta,flags,who):
                 i-=1
                 break
             i-=1
-        while (i+1)%9:
-            j=move(i,i+1,3|j<<2&0x18)
-            i-=1
-        i=s+1
-        j=1
+        while (i+1)%9:j,i=move(i,i+1,3|j<<2&0x18),i-1
+        i,j=s+1,1
         while i%9:
             ap=is_apple(i-1,i)
             if ap!=8:
@@ -107,19 +96,12 @@ def select_chess(map,eta,flags,who):
                 i+=1
                 break
             i+=1
-        while i%9:
-            j=move(i,i-1,4|j<<2&0x18)
-            i+=1
-    elif who==17:
-        for i in range(81):
-            if getmap(map,i,"have chess")>>14==t+1 and s!=i:getmap(map,i,"have chess")|=0x1000
+        while i%9:j,i=move(i,i-1,4|j<<2&0x18),i+1
+    elif who==17:for i in range(81):if getmap(map,i,"have chess")==t+1 and s!=i:setmap(map,i,"me",1)
     elif who==19:
-        for k1,k2 in [[-9,1],[-1,3],[1,4],[9,6]]:
-            i=s
-            j=1
-            while j&1:
-                j=move(i+k1,i,k2|j<<2&0x18)
-                i+=k1
+        for x,epa in l[1:4:2]+l[4:7:2]:
+            i,j=s,1
+            while j&1:j,i=move(i+k1,i,k2|j<<2&0x18),i+k1
 
 def foot_turtle():pass
 
