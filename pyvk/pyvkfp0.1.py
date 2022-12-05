@@ -16,11 +16,11 @@ def first_click(map,apple,pos):#return call_type(always1),map,flags,apple
     flags=0x3fff0000|pos<<8
     if not getmap(map,pos,"up"):flags=setflags(flags,"mouseup",0)
     for i in range(81):map=setmap(map,i,"c",0)
-    move_chess(map,[0]*8,flags,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
+    select_chess(map,[0]*8,flags,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
     flags|=pos
     return 1,map,flags,apple
 
-def move_chess(map,eta,flags,who):
+def select_chess(map,eta,flags,who):
     t=getflags(flags,"t")
     s=getflags(flags,"mouse")
     if who==16:
@@ -32,44 +32,17 @@ def move_chess(map,eta,flags,who):
             if getmap(map,i,"b")==2-t: #敵人
                 if foot_turtle(i,s):setflags(flags,"zd",i)
                 break
+    l=((-10,0),(-9,1),(-8,2),(-1,3),(1,4),(8,5),(9,6),(10,7))
     if who==1 or who==2 or who==13 or who==14 or who==15 or who==16:
-        if who!=2:
-            move(s-1,s,3)
-            move(s+1,s,4)
-        move(s-10,s,0)
-        move(s-9,s,1)
-        move(s-8,s,2)
-        move(s+8,s,5)
-        move(s+9,s,6)
-        move(s+10,s,7)
-    elif who==3:
-        move(s-10,s,0)
-        move(s-8,s,2)
-        move(s-1,s,3)
-        move(s+1,s,4)
-        move(s+8,s,5)
-        move(s+10,s,7)
+        if who!=2:for x,epa in l[3:5]:move(s+x,s,epa)
+        for x,epa in l[0:3]+l[5:8]:move(s+x,s,epa)
+    elif who==3:for x,epa in l[0]+l[2:6]+l[7]:move(s+x,s,epa)
     elif who==4 or who==10:move(s+9,s,6) if t else move(s-9,s,1)
-    elif who==5:
-        move(s-9,s,1)
-        move(s-1,s,3)
-        move(s+1,s,4)
-        move(s+9,s,6)
+    elif who==5:for x,epa in l[1]+l[3:5]+l[6]:move(s,x,s,epa)
     elif who==6:
-        if t:
-            for k in range(8,11):
-                i=s
-                j=1
-                while j&1:
-                    j=move(i+k,i,k-3|j<<2&0x18) #所有loop mo都是先&在|
-                    i+=k
-        else:
-            for k in range(8,11):
-                i=s
-                j=1
-                while j&1:
-                    j=move(i-k,i,10-k|j<<2&0x18) #所有loop mo都是先&在|
-                    i-=k
+        for x,epa in (l[0:3] if t else l[5:8]):
+            i,j=s,1
+            while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+k #所有loop mo都是先&在|
     elif who==7:
         if t:
             for k in [0,2]:
