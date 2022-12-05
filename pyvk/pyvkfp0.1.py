@@ -38,11 +38,11 @@ def select_chess(map,eta,flags,who):
         for x,epa in l[0:3]+l[5:8]:move(s+x,s,epa)
     elif who==3:for x,epa in l[0]+l[2:6]+l[7]:move(s+x,s,epa)
     elif who==4 or who==10:move(s+9,s,6) if t else move(s-9,s,1)
-    elif who==5:for x,epa in l[1]+l[3:5]+l[6]:move(s,x,s,epa)
+    elif who==5:for x,epa in l[1]+l[3:5]+l[6]:move(s+x,s,epa)
     elif who==6:
         for x,epa in (l[0:3] if t else l[5:8]):
             i,j=s,1
-            while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+k #所有loop mo都是先&在|
+            while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x #所有loop mo都是先&在|
     elif who==7:
         for x,epa in (l[:3:2] if t else l[5::2])
             j,i=move(s+x,s,epa),s+x
@@ -51,7 +51,7 @@ def select_chess(map,eta,flags,who):
         for x,epa in l[1]+l[6]:move(s+x,s,epa)
         for x,epa in l[3:5]:
             i,j=s,1
-            while j&1:j,i=move(i+x,i,epa|j<<2&0x18)
+            while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x
     elif who==9 or who==18:
         p=getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
         i=s-9
