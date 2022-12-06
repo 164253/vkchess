@@ -1,37 +1,32 @@
 def getmap(map,pos,type):return map>>(pos<<4)>>{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10,"have chess":0}[type]&{"b":3,"me":3,"p":1,"e":1,"up":0x1f,"down":0x1f,"c":0xf,"have chess":0x3ff}[type]
 def setmap(map,pos,type,value):return map&{"b":0x3fff,"me":0xcfff,"p":0xf7ff,"e":0xfbff,"up":0xfc1f,"down":0xffe0,"c":0xc3ff}[type]<<(pos<<4)|value<<{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10}[type]<<(pos<<4)
 def getflags(flags,type):return flags>>{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0}[type]&{"t":1,"zu":0x7f,"zd":7,"mouseup":1,"mouse":7,"tagup":1,"tag":7}[type]
-def setflags(flags,type,value):return flags&{"t":0x3fffffff,"zu":0x407fffff,"zd":0x7f80ffff,"mouseup":0x7fff7fff,"mouse":0x7fff80ff,"tagup":0x7fffff7f,"tag":0x7fffff80}[type]|value<<{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0}[type]
+def setflags(flags,type,value):return flags&{"t":0x3fffffff,"zu":0x407fffff,"zd":0x7f80ffff,"mouseup":0x7fff7fff,"mouse":0x7fff80ff,"tagup":0x7fffff7f,"tag":0x7fffff80,"mouse,up":0x7fff00ff,"tag,up":0x7fffff00}[type]|value<<{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
 def vkclick(call_type,*args):return {-1:undo,0:first_click,1:second_click,2:born}[call_type](*args)
 
-def undo(map,apple,pre_map,pre_apple):#return call_type(always0),map,flags(always0x3fff7f7f),apple
+def undo(map,apple,pre_map,pre_apple):#return call_type(always0),map,eta(always0),flags(always0x3fff7f7f),apple
     #此處傳入pre_map,pre_apple再傳回看似無意義
     #但未來會改為傳入map和一步棋譜(pre_move) 解析後再回傳
     #為了統一化undo操作才這樣寫
     map=pre_map
     apple=pre_apple
-    return 0,map,0x3fff7f7f,apple
+    return 0,map,0,0x3fff7f7f,apple
 
-def first_click(map,apple,pos):#return call_type(always1),map,flags,apple
-    flags=0x3fff0000|pos<<8
+def first_click(map,apple,pos):#return call_type(always1),map,eta,flags,apple
+    flags=setflags(setflags(flags,"mouse,up",pos),"tag,up",pos)
     if not getmap(map,pos,"up"):flags=setflags(flags,"mouseup",0)
     for i in range(81):map=setmap(map,i,"c",0)
-    select_chess(map,[0]*8,flags,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
-    flags|=pos
-    return 1,map,flags,apple
+    return 1,select_chess(map,[0]*8,flags,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
 
 def select_chess(map,eta,flags,who):
     t=getflags(flags,"t")
     s=getflags(flags,"mouse")
     if who==16:
-        for i in range(s-9,-1,-9):
-            if getmap(map,i,"b")==2-t: #敵人
-                if foot_turtle(i,s):setflags(flags,"zu",i)
-                break
-        for i in range(s+9,81,9):
-            if getmap(map,i,"b")==2-t: #敵人
-                if foot_turtle(i,s):setflags(flags,"zd",i)
-                break
+        for stop,x,flags_type in ((-1,-9,"zu"),(81,9,"zd")):
+            for i in range(s+x,stop,x):
+                if getmap(map,i,"b")==2-t: #敵人
+                    if foot_turtle(i,s):setflags(flags,flags_type,i)
+                    break
     l=((-10,0),(-9,1),(-8,2),(-1,3),(1,4),(8,5),(9,6),(10,7))
     if who==1 or who==2 or who==13 or who==14 or who==15 or who==16:
         if who!=2:for x,epa in l[3:5]:move(s+x,s,epa)
@@ -54,6 +49,7 @@ def select_chess(map,eta,flags,who):
             while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x
     elif who==9 or who==18:
         j,i,p=1,s-9,getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
+        #for stop,x,epa in (
         while i>=0:
             ap=is_apple(i+9,i)
             if ap!=8:
