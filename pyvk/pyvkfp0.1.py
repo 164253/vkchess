@@ -48,51 +48,16 @@ def select_chess(map,eta,flags,who):
             i,j=s,1
             while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x
     elif who==9 or who==18:
-        j,i,p=1,s-9,getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
-        #for stop,x,epa in (
-        while i>=0:
-            ap=is_apple(i+9,i)
-            if ap!=8:
-                j=7 if p else 5
-                eta[1]|=1<<ap
-            if getmap(map,i,"have chess"):
-                i-=9
-                break
-            i-=9
-        while i>=0:j,i=move(i,i+9,1|j<<2&0x18),i-9
-        i,j=s+9,1
-        while i<81:
-            ap=is_apple(i-9,i)
-            if ap!=8:
-                j=7 if p else 5
-                eta[6]|=1<<ap
-            if getmap(map,i,"have chess"):
-                i+=9
-                break
-            i+=9
-        while i<81:j,i=move(i,i-9,6|j<<2&0x18),i+9
-        i,j=s-1,1
-        while (i+1)%9:
-            ap=is_apple(i+1,i)
-            if ap!=8:
-                j=7 if p else 5
-                eta[3]|=1<<ap
-            if getmap(map,i,"have chess"):
-                i-=1
-                break
-            i-=1
-        while (i+1)%9:j,i=move(i,i+1,3|j<<2&0x18),i-1
-        i,j=s+1,1
-        while i%9:
-            ap=is_apple(i-1,i)
-            if ap!=8:
-                j=7 if p else 5
-                eta[4]|=1<<ap
-            if getmap(map,i,"have chess"):
-                i+=1
-                break
-            i+=1
-        while i%9:j,i=move(i,i-1,4|j<<2&0x18),i+1
+        p=getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
+        for stop,x,epa in (((lambda x:x>=0)+l[1]),((lambda x:x<81)+l[6]),((lambda x:(x+1)%9)+l[3]),((lambda x:x%9)+l[4]))
+            j,i=1,s+x
+            while stop(i):
+                ap,i=is_apple(i+x,i),i+x
+                if ap!=8:
+                    j=7 if p else 5
+                    eta[epa]|=1<<ap #這行要改seteta
+                if getmap(map,i-x,"have chess"):break
+            while i>=0:j,i=move(i,i+9,epa|j<<2&0x18),i+x
     elif who==17:for i in range(81):if getmap(map,i,"have chess")==t+1 and s!=i:setmap(map,i,"me",1)
     elif who==19:
         for x,epa in l[1:4:2]+l[4:7:2]:
