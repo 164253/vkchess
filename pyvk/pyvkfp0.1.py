@@ -2,6 +2,8 @@ def getmap(map,pos,type):return map>>(pos<<4)>>{"b":14,"me":12,"p":11,"e":10,"up
 def setmap(map,pos,type,value):return map&{"b":0x3fff,"me":0xcfff,"p":0xf7ff,"e":0xfbff,"up":0xfc1f,"down":0xffe0,"c":0xc3ff}[type]<<(pos<<4)|value<<{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10}[type]<<(pos<<4)
 def getflags(flags,type):return flags>>{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0}[type]&{"t":1,"zu":0x7f,"zd":7,"mouseup":1,"mouse":7,"tagup":1,"tag":7}[type]
 def setflags(flags,type,value):return flags&{"t":0x3fffffff,"zu":0x407fffff,"zd":0x7f80ffff,"mouseup":0x7fff7fff,"mouse":0x7fff80ff,"tagup":0x7fffff7f,"tag":0x7fffff80,"mouse,up":0x7fff00ff,"tag,up":0x7fffff00}[type]|value<<{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
+def geteta(eta,pos):return eta>>(pos<<3)&0xff
+def seteta(eta,pos,value):return eta^geteta(eta,pos)|value<<(pos<<3)
 def vkclick(call_type,*args):return {-1:undo,0:first_click,1:second_click,2:born}[call_type](*args)
 
 def undo(map,apple,pre_map,pre_apple):#return call_type(always0),map,eta(always0),flags(always0x3fff7f7f),apple
@@ -16,9 +18,10 @@ def first_click(map,apple,pos):#return call_type(always1),map,eta,flags,apple
     flags=setflags(setflags(flags,"mouse,up",pos),"tag,up",pos)
     if not getmap(map,pos,"up"):flags=setflags(flags,"mouseup",0)
     for i in range(81):map=setmap(map,i,"c",0)
-    return 1,select_chess(map,[0]*8,flags,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
+    return 1,select_chess(map,flags,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
 
-def select_chess(map,eta,flags,who):
+def select_chess(map,flags,who):
+    eta=0
     t=getflags(flags,"t")
     s=getflags(flags,"mouse")
     if who==16:
@@ -55,14 +58,15 @@ def select_chess(map,eta,flags,who):
                 ap,i=is_apple(i+x,i),i+x
                 if ap!=8:
                     j=7 if p else 5
-                    eta[epa]|=1<<ap #這行要改seteta
+                    seteta(eta,epa,1<<ap)
                 if getmap(map,i-x,"have chess"):break
             while i>=0:j,i=move(i,i+9,epa|j<<2&0x18),i+x
     elif who==17:for i in range(81):if getmap(map,i,"have chess")==t+1 and s!=i:setmap(map,i,"me",1)
     elif who==19:
         for x,epa in l[1:4:2]+l[4:7:2]:
             i,j=s,1
-            while j&1:j,i=move(i+k1,i,k2|j<<2&0x18),i+k1
+            while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x
+    return map,eta,flags,apple
 
 def foot_turtle():pass
 
