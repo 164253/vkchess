@@ -4,6 +4,8 @@ def getflags(flags,type):return flags>>{"t":30,"zu":23,"zd":16,"mouseup":15,"mou
 def setflags(flags,type,value):return flags&{"t":0x3fffffff,"zu":0x407fffff,"zd":0x7f80ffff,"mouseup":0x7fff7fff,"mouse":0x7fff80ff,"tagup":0x7fffff7f,"tag":0x7fffff80,"mouse,up":0x7fff00ff,"tag,up":0x7fffff00}[type]|value<<{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
 def geteta(eta,pos):return eta>>(pos<<3)&0xff
 def seteta(eta,pos,value):return eta^geteta(eta,pos)|value<<(pos<<3)
+def getapple(apple,pos):return apple>>pos&1
+def setapple(apple,pos,value):return apple^(getapple(apple,pos)^value)<<pos
 def vkclick(call_type,*args):return {-1:undo,0:first_click,1:second_click,2:born}[call_type](*args)
 
 def undo(map,apple,pre_map,pre_apple):#return call_type(always0),map,eta(always0),flags(always0x3fff7f7f),apple
@@ -55,7 +57,7 @@ def select_chess(map,flags,who):
         for stop,x,epa in (((lambda x:x>=0)+l[1]),((lambda x:x<81)+l[6]),((lambda x:(x+1)%9)+l[3]),((lambda x:x%9)+l[4]))
             j,i=1,s+x
             while stop(i):
-                ap,i=is_apple(i+x,i),i+x
+                ap,i=is_apple(apple,i+x,i),i+x
                 if ap!=8:
                     j=7 if p else 5
                     seteta(eta,epa,1<<ap)
@@ -72,7 +74,9 @@ def foot_turtle():pass
 
 def move():pass
 
-def is_apple():pass
+def is_apple(apple,end,start):
+    d={27:0,29:1,33:2,35:3,38:5,42:6,44:7}.get(min(start,end),8) #8表不同排,後面ap!=8即此意
+    return d if start%9!=end%9 && getapple(apple,d) else 8
 
 def second_click():pass
 
