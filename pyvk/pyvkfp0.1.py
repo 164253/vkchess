@@ -72,7 +72,34 @@ def select_chess(map,flags,who):
 
 def foot_turtle():pass
 
-def move():pass
+def move_limit(end,start):pass
+
+def move(map,flags,eta,end,start,epa): #e=evolution p=ispoison a=whichEta #return &1keep &2p &4e
+    mou=getflags(flags,"mouse")
+    if move_limit(end,start):
+        if getmap(map,end,"b")==2-getflags(flags,"t") #敵人 #吃人無論如何都是return 0
+            if foot_turtle(end,mou):
+                ap=is_apple(apple,end,start)
+                setmap(map,end,"me",2)
+                if epa&16 or ap!=8: #為什麼是8見is_apple()
+                    setmap(map,end,"e",1)
+                    seteta(eta,epa&7,1<<ap) #eta[a]加入第ap個銅錢草
+                    if epa&8 or not getflags(flags,"mouseUp") and getmap(map,mou,"up"):
+                        setmap(map,end,"p",1)
+                        return 6
+                    return 4
+        elif not getmap(map,end,"have chess") or not getmap(map,end,"up") and (getflags(flags,"mouseUp") or getmap(map,mou,"up")):
+            ap=is_apple(apple,end,start)
+            setmap(map,end,"me",1)
+            if epa&16 or ap!=8:
+                setmap(map,end,"e",1)
+                seteta(eta,epa&7,1<<ap) #eta[a]加入第ap個銅錢草
+                if epa&8 or not getflags(flags,"mouseUp") and getmap(map,mou,"up"):
+                    setmap(map,end,"p",1)
+                    return 6|(not m[end]&0x1f)
+                return 4|(not m[end]&0x1f)
+            return not m[end]&0x1f
+    return 0 #所有沒return,要中斷迴圈都來這
 
 def is_apple(apple,end,start):
     d={27:0,29:1,33:2,35:3,38:5,42:6,44:7}.get(min(start,end),8) #8表不同排,後面ap!=8即此意
