@@ -96,9 +96,9 @@ def move(map,flags,eta,end,start,epa): #e=evolution p=ispoison a=whichEta #retur
                 seteta(eta,epa&7,1<<ap) #eta[a]加入第ap個銅錢草
                 if epa&8 or not getflags(flags,"mouseUp") and getmap(map,mou,"up"):
                     setmap(map,end,"p",1)
-                    return 6|(not m[end]&0x1f)
-                return 4|(not m[end]&0x1f)
-            return not m[end]&0x1f
+                    return 6|(not getmap(map,end,"down"))
+                return 4|(not getmap(map,end,"down"))
+            return not getmap(map,end,"down")
     return 0 #所有沒return,要中斷迴圈都來這
 
 def is_apple(apple,end,start):
