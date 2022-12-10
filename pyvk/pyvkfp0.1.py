@@ -20,9 +20,9 @@ def first_click(map,apple,pos):#return call_type(always1),map,eta,flags,apple
     flags=setflags(setflags(flags,"mouse,up",pos),"tag,up",pos)
     if not getmap(map,pos,"up"):flags=setflags(flags,"mouseup",0)
     for i in range(81):map=setmap(map,i,"c",0)
-    return 1,select_chess(map,flags,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
+    return 1,select_chess(map,flags,apple,getmap(map,pos&0x7f,"up"if pos&0x80 else"down"))
 
-def select_chess(map,flags,who):
+def select_chess(map,flags,apple,who):
     eta=0
     t=getflags(flags,"t")
     s=getflags(flags,"mouse")
@@ -30,21 +30,22 @@ def select_chess(map,flags,who):
         for stop,x,flags_type in ((-1,-9,"zu"),(81,9,"zd")):
             for i in range(s+x,stop,x):
                 if getmap(map,i,"b")==2-t: #敵人
-                    if foot_turtle(i,s):setflags(flags,flags_type,i)
+                    if foot_turtle(map,i,s):setflags(flags,flags_type,i)
                     break
     l=((-10,0),(-9,1),(-8,2),(-1,3),(1,4),(8,5),(9,6),(10,7))
-    if who==1 or who==2 or who==13 or who==14 or who==15 or who==16:
-        if who!=2:for x,epa in l[3:5]:move(s+x,s,epa)
-        for x,epa in l[0:3]+l[5:8]:move(s+x,s,epa)
-    elif who==3:for x,epa in l[0]+l[2:6]+l[7]:move(s+x,s,epa)
-    elif who==4 or who==10:move(s+9,s,6) if t else move(s-9,s,1)
-    elif who==5:for x,epa in l[1]+l[3:5]+l[6]:move(s+x,s,epa)
+    r=(((0,8)),((0,3),(5,8)),((0,1),(2,6),(7,8)),((6,7) if t else (1,2)),((1,2),(3,5),(6,7)))
+    if who==10:who=4
+    if 12<who<17:who=1
+    if who<6:
+        for ir in r[who-1]:
+            for a,b in ir:
+                for x,epa in l[a:b]:move(map,flags,eta,apple,s+x,s,epa)
     elif who==6:
         for x,epa in (l[0:3] if t else l[5:8]):
             i,j=s,1
             while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x #所有loop mo都是先&在|
     elif who==7:
-        for x,epa in (l[:3:2] if t else l[5::2])
+        for x,epa in (l[:3:2] if t else l[5::2]):
             j,i=move(s+x,s,epa),s+x
             while j&1:j,i=move(i+9 if t else i-9,i,epa|j<<2&0x18),(i+9 if t else i-9) #所有loop mo都是先&在|
     elif who==8:
@@ -54,7 +55,7 @@ def select_chess(map,flags,who):
             while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x
     elif who==9 or who==18:
         p=getmap(map,s,"up") and not getflags(flags,"mouseup") #will p
-        for stop,x,epa in (((lambda x:x>=0)+l[1]),((lambda x:x<81)+l[6]),((lambda x:(x+1)%9)+l[3]),((lambda x:x%9)+l[4]))
+        for stop,x,epa in (((lambda x:x>=0)+l[1]),((lambda x:x<81)+l[6]),((lambda x:(x+1)%9)+l[3]),((lambda x:x%9)+l[4])):
             j,i=1,s+x
             while stop(i):
                 ap,i=is_apple(apple,i+x,i),i+x
@@ -63,22 +64,33 @@ def select_chess(map,flags,who):
                     seteta(eta,epa,1<<ap)
                 if getmap(map,i-x,"have chess"):break
             while i>=0:j,i=move(i,i+9,epa|j<<2&0x18),i+x
-    elif who==17:for i in range(81):if getmap(map,i,"have chess")==t+1 and s!=i:setmap(map,i,"me",1)
+    elif who==17:
+        for i in range(81):
+            if getmap(map,i,"have chess")==t+1 and s!=i:setmap(map,i,"me",1)
     elif who==19:
         for x,epa in l[1:4:2]+l[4:7:2]:
             i,j=s,1
             while j&1:j,i=move(i+x,i,epa|j<<2&0x18),i+x
     return map,eta,flags,apple
 
-def foot_turtle():pass
+def foot_turtle(map,end,start):
+    end_up=getmap(map,end,"up") if getmap(map,end,"up") else getmap(map,end,"down")
+    start_up=getmap(map,start,"up") if getmap(map,start,"up") else getmap(map,start,"down")
+    if start_up<4:return 1 #if(start_up==1 or start_up==2 or start_up==3)return 1
+    if end_up!=13:return end_up!=15 or not (end-start)%9 #if(w沒大腳怪)[w鱷龜]
+    #w大腳怪
+    if start_up!=13:return 0
+    return end_up!=15 or not (end-start)%9 #if(s沒大腳怪)[w鱷龜]
 
-def move_limit(end,start):pass
+def move_limit(end,start):
+    pos,dcol,scol=end-start,(end-start)%9,start%9 #dcol=差值(delta)column,scol=start column
+    return (not dcol==8 or scol) and (not dcol==1 or scol!=8) and (pos<-1 and start>8) and (pos>1 and start<72)
 
-def move(map,flags,eta,end,start,epa): #e=evolution p=ispoison a=whichEta #return &1keep &2p &4e
+def move(map,flags,eta,apple,end,start,epa): #e=evolution p=ispoison a=whichEta #return &1keep &2p &4e
     mou=getflags(flags,"mouse")
     if move_limit(end,start):
-        if getmap(map,end,"b")==2-getflags(flags,"t") #敵人 #吃人無論如何都是return 0
-            if foot_turtle(end,mou):
+        if getmap(map,end,"b")==2-getflags(flags,"t"): #敵人 #吃人無論如何都是return 0
+            if foot_turtle(map,end,mou):
                 ap=is_apple(apple,end,start)
                 setmap(map,end,"me",2)
                 if epa&16 or ap!=8: #為什麼是8見is_apple()
@@ -103,7 +115,7 @@ def move(map,flags,eta,end,start,epa): #e=evolution p=ispoison a=whichEta #retur
 
 def is_apple(apple,end,start):
     d={27:0,29:1,33:2,35:3,38:5,42:6,44:7}.get(min(start,end),8) #8表不同排,後面ap!=8即此意
-    return d if start%9!=end%9 && getapple(apple,d) else 8
+    return d if start%9!=end%9 and getapple(apple,d) else 8
 
 def second_click():pass
 
