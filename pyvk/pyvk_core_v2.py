@@ -1,7 +1,7 @@
-#12/12 0.1
+#12/13 0.1
 '''未完成
-get set 抽離改到second_click elif
-還有select_chess也一堆要改
+get set 抽離改到shot poison
+還有select_chess也一堆迴圈要改
 增加糧食危機
 增加鳳梨
 '''
@@ -282,7 +282,7 @@ def how_many_kmdl(turn):
     return 0
 
 def second_click():
-    global m,c,eta,apple
+    global eta,apple
     end=getc("mouse")
     start=getc("tag")
     tu=getm(start,"up" if getm(start,"up") else "down")
@@ -301,30 +301,40 @@ def second_click():
                 setm(start,"down",0)
         to_penguin() #to pen
     else:
-        if m[end]&0x400:apple^=eta[which_eta(td,end-start)]&((1<<1+ap_pos(max(start,end)))-1^(1<<1+ap_pos(min(start,end)))-1) #appleDel 
-        if m[end]&0x2000: #吃
-            if poison_frog(end,start):m[end]&=0x3c00 #wb=end_up=wd=0
+        if getm(end,"e"):apple^=eta[which_eta(td,end-start)]&((1<<1+ap_pos(max(start,end)))-1^(1<<1+ap_pos(min(start,end)))-1) #appleDel 
+        if getm(end,"me")==2: #吃
+            if poison_frog(end,start):
+                setm(end,"b",0)
+                setm(end,"up",0)
+                setm(end,"down",0)
             else:
-                m[end]=(m[end]&0x3c00)|td|(t+1<<14) #wb=t+1,wd=td,end_up=0
-                if m[start]&0x3e0 and ~c&0x80:m[end]|=tu<<5 #if(tu and !tagUp)end_up=tu
-        elif m[end]>>14:m[end]|=tu<<5 #if(wb)end_up=tu
+                setm(end,"b",t+1)
+                setm(end,"down",td)
+                if getm(start,"up") and not getc("tagup"):setm(end,"up",tu)
+        elif getm(end,"b"):sstm(end,"up",tu)
         else:
-            m[end]|=td|(t+1<<14) #wd=td,wb=tb
-            if m[start]&0x3e0 and ~c&0x80:m[end]|=tu<<5 #if(start_up and !tagUp)end_up=tu
-        if m[end]&0x400 and 1<tu<11:m[end]+=9<<(not not m[end]&0x3e0)*5 #if((m[end].e)&&(tu!=1)&&未進化)m[end].down=tu+9 #進化
-        m[start]&=0xfc1f #start_up=0
-        if ~c&0x80:m[start]&=0x3fe0 #if(!tagUp)sd=sb=0
-        if m[end]&0x800:m[end]&=0x3c00 #if(m[end].p)end_up=wd=wb=0
+            setm(end,"up",t+1)
+            setm(end,"down",td)
+            if getm(start,"up") and not getc("tagup"):setm(end,"up",tu)
+        if getm(end,"e") and 1<tu<11:setm(end,"up" if getm(end,"up") else "down",tu+9)
+        setm(start,"up",0)
+        if not getc("tagup"):
+            setm(start,"b",0)
+            setm(start,"down",0)
+        if getm(end,"p"):
+            setm(end,"b",0)
+            setm(end,"up",0)
+            setm(end,"down",0)
         to_penguin()
-        if tu==1 and m[end]&0x2400: #if(tu=1 and (m[end].me=2 or m[end].e))
+        if tu==1 and (getm(end,"me")==2 or getm(end,"e")):
             if t: #if(後手)
-                if (not m[4]&0x4000) and (not m[4]&0x3e0):m[81]|=4|c>>31<<3 #if(*(m+4).b!=1 and *(m+4).up空)born()
-            elif (not m[76]&0x8000) and (not m[76]&0x3e0):m[81]|=4|c>>31<<3 #elif(*(m+76).b!=2 and *(m+76).up空)born()
+                if getm(4,"b")!=1 and not getm(4,"up"):setc("kmdlborn",1)
+            elif getm(76,"b")!=2 and not getm(76,"up"):setc("kmdlborn",1)
 
 def shot_poison():
     global m,c
-    end=c>>8&0x7f
-    start=c&0x7f
+    end=getc("mouse")
+    start=getc("tag")
     if m[start]>>5&0x1f==14:
         if whale(end):m[start]=0
     c|=(m[start]>>5&0x1f==1)<<30
