@@ -1,6 +1,7 @@
-#11/16 0.1
+#12/12 0.1
 '''未完成
-普通步動耳廓狐後 多動卡住了
+get set 抽離改到second_click elif
+還有select_chess也一堆要改
 增加糧食危機
 增加鳳梨
 '''
@@ -13,6 +14,29 @@ struct control{t:1,kmdlborn:1,zu:7,zd:7,mouse:8,tag:8}c #kmdlborn用不到了,sa
 [start_up] selfUp=self(兩高用.up,一高用.down)
 [w鱷龜] if(w無鱷龜)=1 elif同直行=1 else 0
 '''
+getm=lambda pos,type:m[pos]>>{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10,"have chess":0}[type]&{"b":3,"me":3,"p":1,"e":1,"up":0x1f,"down":0x1f,"c":0xf,"have chess":0x3ff}[type]
+# getm=lambda pos,type:m>>(pos<<4)>>{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10,"have chess":0}[type]&{"b":3,"me":3,"p":1,"e":1,"up":0x1f,"down":0x1f,"c":0xf,"have chess":0x3ff}[type]
+def setm(pos,type,value):
+    global m
+    m[pos]=m[pos]&{"b":0x3fff,"me":0xcfff,"p":0xf7ff,"e":0xfbff,"up":0xfc1f,"down":0xffe0,"c":0xc3ff}[type]|value<<{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10}[type]
+    # m=m&{"b":0x3fff,"me":0xcfff,"p":0xf7ff,"e":0xfbff,"up":0xfc1f,"down":0xffe0,"c":0xc3ff}[type]<<(pos<<4)|value<<{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10}[type]<<(pos<<4)
+getc=lambda type:c>>{"t":31,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0}[type]&{"t":1,"zu":0x7f,"zd":0x7f,"mouseup":1,"mouse":0x7f,"tagup":1,"tag":0x7f}[type]
+# getc=lambda type:c>>{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0}[type]&{"t":1,"zu":0x7f,"zd":0x7f,"mouseup":1,"mouse":0x7f,"tagup":1,"tag":0x7f}[type]
+def setc(type,value):
+    global c
+    c=c&{"t":0x7fffffff,"zu":0xc07fffff,"zd":0xff80ffff,"mouseup":0xffff7fff,"mouse":0xffff80ff,"tagup":0xffffff7f,"tag":0xffffff80,"mouse,up":0xffff00ff,"tag,up":0xffffff00}[type]|value<<{"t":31,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
+    # c=c&{"t":0x3fffffff,"zu":0x407fffff,"zd":0x7f80ffff,"mouseup":0x7fff7fff,"mouse":0x7fff80ff,"tagup":0x7fffff7f,"tag":0x7fffff80,"mouse,up":0x7fff00ff,"tag,up":0x7fffff00}[type]|value<<{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
+geteta=lambda pos:eta[pos]&0xff
+# geteta=lambda pos:eta>>(pos<<3)&0xff
+def seteta(pos,value):
+    global eta
+    eta[pos]=eta[pos]^geteta(pos)|value
+getapple=lambda pos:apple>>pos&1
+# getapple=lambda pos:apple>>2*pos&3
+def setapple(pos,value):
+    global apple
+    apple^=getapple(pos)^value<<pos
+    # apple=(apple^getapple(pos)<<2*pos)|value<<2*pos
 m=0
 c=0
 eta=[0]*8
@@ -23,39 +47,28 @@ ffox=0
 #*(m+83){c:低16}
 #*(m+84~91){eta:0~7}
 def reset():
-    global eta,m,c
-    eta=[0]*8 #eta清空
-    for i in range(81):m[i]&=0xc3ff #m[0~81].c清空
-    c|=0x3fff0000 #c重置
+    for i in range(8):seteta(i,0)
+    for i in range(81):setm(i,"c",0)
+    for type,value in (("t",0),("zu",0x7f),("zd",0x7f)):setc(type,value)
 
-def move_limit(end,start): #無規律只能窮舉
-    return {-10:start%9 and start>8,
-     -9:start>8, #非最上橫排
-     -8:start%9!=8 and start>8,
-     -1:start%9, #非最左橫排
-     1:start%9!=8, #非最右橫排
-     8:start%9 and start<72,
-     9:start<72, #非最下橫排
-     10:start%9!=8 and start<72
-    }[end-start]
-    #剩的自己排列組合
+def move_limit(end,start):
+    pos,dcol,scol=end-start,(end-start)%9,start%9 #dcol=差值(delta)column,scol=start column
+    return (not dcol==8 or scol) and (not dcol==1 or scol!=8) and (pos>=-1 or start>8) and (pos<=1 or start<72)
 
 def foot_turtle(end,start):
-    global m
-    end_up=m[end]>>(not not m[end]&0x3e0)*5&0x1f
-    start_up=m[start]>>(not not m[start]&0x3e0)*5&0x1f
-    if start_up<3:return 1 #if(start_up==1 or start_up==2)return 1
+    end_up=getm(end,"up" if getm(end,"up") else "down")
+    start_up=getm(start,"up" if getm(start,"up") else "down")
+    if start_up<4:return 1 #if(start_up==1 or start_up==2 or start_up==3)return 1
     if end_up!=13:return end_up!=15 or not (end-start)%9 #if(w沒大腳怪)[w鱷龜]
     #w大腳怪
     if start_up!=13:return 0
     return end_up!=15 or not (end-start)%9 #if(s沒大腳怪)[w鱷龜]
 
 def poison_frog(end,start):
-    global m
-    end_up=m[end]>>(not not m[end]&0x3e0)*5&0x1f #[end_up]
+    end_up=getm(end,"up" if getm(end,"up") else "down")
     if end_up!=18:return 0 #w沒箭毒蛙
     #w箭毒蛙
-    start_up=m[start]>>(not not m[start]&0x3e0)*5&0x1f #[start_up]
+    start_up=getm(start,"up" if getm(start,"up") else "down")
     if start_up!=15:return start_up!=13 #if(s無鱷龜)return if(s大腳怪)=1 else  0
     return not (end-start)%9 #s鱷龜 if(同直行)=1 else=0
 
@@ -63,35 +76,35 @@ ap_pos=lambda x:x//9*34+(x%9<<1)
 
 def move(end,start,epa): #e=evolution p=ispoison a=whichEta #return &1keep &2p &4e
     global m,c,eta
-    mou=c>>8&0x7f
+    mou=getc("mouse")
     if move_limit(end,start):
-        if m[end]>>14 == 2-(c>>31): #敵人 #吃人無論如何都是return 0
+        print(getm(end,"b"),getc("t"))
+        if getm(end,"b")==2-getc("t"): #敵人 #吃人無論如何都是return 0
             if foot_turtle(end,mou):
                 ap=ap_pos(end)+ap_pos(start)>>1
-                m[end]|=0x2000 #m[end].me=2
+                setm(end,"me",2)
                 if epa&16 or apple>>ap&1:
-                    m[end]|=0x400 #m[end].e=1
-                    eta[epa&7]|=1<<ap #eta[a]加入第ap個銅錢草
-                    if epa&8 or ~c&0x8000 and m[mou]&0x3e0: #if(p or (!mouseUp and m[mou].up))m[end].p=1
-                        m[end]|=0x800
+                    setm(end,"e",1)
+                    seteta(epa&7,1<<ap) #eta[a]加入第ap個銅錢草
+                    if epa&8 or not getc("mouseup") and getm(mou,"up"):
+                        setm(end,"p",1)
                         return 6
                     return 4
-        elif not m[end] or not m[end]&0x3e0 and (c&0x8000 or not m[mou]&0x3e0): #m[end]空 or (m[end].up空 and (mouseUp or m[mou].up空))
+        elif not getm(end,"have chess") or not getm(end,"up") and (getc("mouseup") or not getm(mou,"up")):
             ap=ap_pos(end)+ap_pos(start)>>1
-            # print("ap",end,start,ap_pos(end),ap_pos(start),ap)
-            m[end]|=0x1000 #m[end].me=1
+            setm(end,"me",1)
             if epa&16 or apple>>ap&1:
-                m[end]|=0x400
-                eta[epa&7]|=1<<ap
-                if epa&8 or ~c&0x8000 and m[mou]&0x3e0:
-                    m[end]|=0x800
-                    return 6|(not m[end]&0x1f)
-                return 4|(not m[end]&0x1f)
-            return not m[end]&0x1f
+                setm(end,"e",1)
+                seteta(epa&7,1<<ap) #eta[a]加入第ap個銅錢草
+                if epa&8 or not getc("mouseup") and getm(mou,"up"):
+                    setm(end,"p",1)
+                    return 6|(not getm(end,"down"))
+                return 4|(not getm(end,"down"))
+            return not getm(end,"down")
     return 0 #所有沒return,要中斷迴圈都來這
 
-def which_eta(down,t): #down=移動者,t=移動量
-    if down!=7:
+def which_eta(who,t): #who=移動者,t=移動量
+    if who!=7:
         if t<0:
             if t%10:return 1
             elif t%9:return 2
@@ -102,44 +115,22 @@ def which_eta(down,t): #down=移動者,t=移動量
             elif t%9:return 5
             elif t%8:return 4
             else:return 7
-    if c>>31:return 5 if t%9!=1 else 7
+    if getc("t"):return 5 if t%9!=1 else 7
     return 2 if t%9!=1 else 0
 
-def switch_dict(down):
+def select_chess(who):
     global m,eta,c
-    t=c>>31 #t=turn
-    s=c>>8&0x7f #s=mouse
-    if down==16:
-        for i in range(s-9,-1,-9):
-            if m[i]>>14==2-t: #敵人
-                if foot_turtle(i,s):c=c&0xc07fffff|i<<23
-                break
-        for i in range(s+9,81,9):
-            if m[i]>>14==2-t: #敵人
-                if foot_turtle(i,s):c=c&0xff80ffff|i<<16
-                break
-    if down==1 or down==2 or down==13 or down==14 or down==15 or down==16:
-        if down!=2:
-            move(s-1,s,3)
-            move(s+1,s,4)
-        move(s-10,s,0)
-        move(s-9,s,1)
-        move(s-8,s,2)
-        move(s+8,s,5)
-        move(s+9,s,6)
-        move(s+10,s,7)
-    elif down==11:
-        move(s-10,s,0)
-        move(s-8,s,2)
-        move(s+8,s,5)
-        move(s+10,s,7)
-    elif down==4 or down==10:move(s+9,s,6) if t else move(s-9,s,1)
-    elif down==5:
-        move(s-9,s,1)
-        move(s-1,s,3)
-        move(s+1,s,4)
-        move(s+9,s,6)
-    elif down==6:
+    t=getc("t")
+    s=getc("mouse")
+    if who==16:
+        for stop,x,flags_type in ((-1,-9,"zu"),(81,9,"zd")):
+            for i in range(s+x,stop,x):
+                if getm(i,"b")==2-t: #敵人
+                    if foot_turtle(i,s):setc(flags_type,i)
+                    break
+    l=((-10,0),(-9,1),(-8,2),(-1,3),(1,4),(8,5),(9,6),(10,7))
+    r=(((0,8),),((0,3),(5,8)),((0,1),(2,6),(7,8)),((6,7) if t else (1,2),),((0,1),(2,3),(5,6),(7,8)))
+    if who==6:
         if t:
             for k in range(8,11):
                 i=s
@@ -154,7 +145,7 @@ def switch_dict(down):
                 while j&1:
                     j=move(i-k,i,10-k|j<<2&0x18) #所有loop mo都是先&在|
                     i-=k
-    elif down==7:
+    elif who==7:
         if t:
             for k in [0,2]:
                 i=s+8+k
@@ -169,7 +160,7 @@ def switch_dict(down):
                 while j&1:
                     j=move(i-9,i,2-k|j<<2&0x18) #所有loop mo都是先&在|
                     i-=9
-    elif down==8:
+    elif who==8:
         move(s-9,s,1)
         move(s+9,s,6)
         for k in [0,1]:
@@ -178,7 +169,7 @@ def switch_dict(down):
             while j&1:
                 j=move(i+1 if k else i-1,i,3+k|j<<2&0x18)
                 i+=1 if k else -1
-    elif down==9 or down==18:
+    elif who==9 or who==18:
         p=m[s]&0x3e0 and ~c&0x8000 #will p
         i=s-9
         j=1
@@ -236,68 +227,78 @@ def switch_dict(down):
         while i%9:
             j=move(i,i-1,4|j<<2&0x18)
             i+=1
-    elif down==17:
+    elif who==17:
         for i in range(81):
             if m[i]>>14==t+1 and s!=i:m[i]|=0x1000
-    elif down==19:
+    elif who==19:
         for k1,k2 in [[-9,1],[-1,3],[1,4],[9,6]]:
             i=s
             j=1
             while j&1:
                 j=move(i+k1,i,k2|j<<2&0x18)
                 i+=k1
+    else:
+        if who==10:who=4
+        elif who==11:who=5
+        elif 12<who<17:who=1
+        print(r[who-1])
+        for ir in r[who-1]:
+            for x,epa in l[ir[0]:ir[1]]:move(s+x,s,epa)
 
-def first_set():
-    global c,m
-    if not m[c>>8&0x7f]&0x3e0:c&=0xffff7fff #if(m[mouse].up空)mouseUp=0
+def first_click():
+    if not getm(getc("mouse"),"up"):setc("mouseup",0)
     reset()
-    switch_dict(m[c>>8&0x7f]>>(not not c&0x8000)*5&0x1f) #原理同[end_up],[start_up]
-    c=c^(c&0xff)|(c>>8&0xff) #tag(Up)=mouse(Up)
+    select_chess(getm(getc("mouse"),"up" if getc("mouseup") else "down"))
 
 def whale(start):
-    global m
     p=0 #八格遍歷,只能窮舉
     for i in range(8):
-        th=start+[-10,-9,-8,-1,1,8,9,10][i]
-        tu=m[th]>>(not not m[th]&0x3e0)*5&0x1f
-        if move_limit(start,th) and m[th]>>14==2-(c>>31) and tu!=13 and (tu!=15 or i==1 or i==6):
+        th=start+(-10,-9,-8,-1,1,8,9,10)[i]
+        tu=getm(th,"up" if getm(th,"up") else "down")
+        if move_limit(start,th) and getm(th,"b")==2-getc("t") and tu!=13 and (tu!=15 or i==1 or i==6):
             if tu==18:p=1 #自己頭上必鯨魚
-            m[th]=0
+            setm(th,"up",0)
+            setm(th,"down",0)
     return p
 
 def to_penguin():
-    global m
     for i in range(72,81):
-        if m[i]&0x8000: #b==2
-            up=m[i]>>5&0x1f
-            down=m[i]&0x1f
-            if up and (up==6 or up==7 or up==4 or up==10):m[i]=m[i]&0xfc1f|0x260 #頭up只是拿來加速短路
-            if down==6 or down==7 or down==4 or down==10:m[i]=m[i]&0xffe0|0x13
+        if getm(i,"b")==2:
+            up=getm(i,"up")
+            down=getm(i,"down")
+            if up and (up==6 or up==7 or up==4 or up==10):setm(i,"up",19) #頭up只是拿來加速短路
+            if down==6 or down==7 or down==4 or down==10:setm(i,"down",19)
     for i in range(9):
-        if m[i]&0x4000: #b==1
-            up=m[i]>>5&0x1f
-            down=m[i]&0x1f
-            if up and (up==6 or up==7 or up==4 or up==10):m[i]=m[i]&0xfc1f|0x260 #頭up只是拿來加速短路
-            if down==6 or down==7 or down==4 or down==10:m[i]=m[i]&0xffe0|0x13
+        if getm(i,"b")==1:
+            up=getm(i,"up")
+            down=getm(i,"down")
+            if up and (up==6 or up==7 or up==4 or up==10):setm(i,"up",19) #頭up只是拿來加速短路
+            if down==6 or down==7 or down==4 or down==10:setm(i,"down",19)
 
 def how_many_kmdl(turn):
-    global m
+    turn+=1
     for i in range(81):
-        if (m[i]>>14)-1==turn and (m[i]&0x1f==1 or m[i]&0x3e0==32):return 1
+        if getm(i,"b")==turn and (getm(i,"up")==1 or getm(i,"up")==32):return 1
     return 0
 
-def second_set():
+def second_click():
     global m,c,eta,apple
-    end=c>>8&0x7f
-    start=c&0x7f
-    tu=m[start]>>(not not m[start]&0x3e0)*5&0x1f
-    td=m[start]>>(not not c&0x80)*5&0x1f
-    t=c>>31
-    if tu==14 or tu==5 and m[end]&0x400:m[end]|=0x800 if whale(end) else 0 #if(tu鯨魚 or (tu鯰魚 and m[end].e)whale
+    end=getc("mouse")
+    start=getc("tag")
+    tu=getm(start,"up" if getm(start,"up") else "down")
+    td=getm(start,"down")
+    t=getc("t")
+    if tu==14 or tu==5 and getm(end,"e"):setm(end,"p",whale(end))
     if td==17: #鬣蜥
-        m[start],m[end]=m[end],m[start] #換
-        if m[start]>>(not not m[start]&0x3e0)*5&0x1f==14: #whale
-            if whale(start):m[start]=0
+        temp=(getm(end,"up"),getm(end,"down"))
+        setm(end,"up",getm(start,"up"))
+        setm(end,"down",getm(start,"down"))
+        setm(start,"up",temp[0])
+        setm(start,"down",temp[1])
+        if getm(start,"up" if getm(start,"up") else "down")==14: #whale
+            if whale(start):
+                setm(start,"up",0)
+                setm(start,"down",0)
         to_penguin() #to pen
     else:
         if m[end]&0x400:apple^=eta[which_eta(td,end-start)]&((1<<1+ap_pos(max(start,end)))-1^(1<<1+ap_pos(min(start,end)))-1) #appleDel 
@@ -351,7 +352,7 @@ def pyvkcorecall(pm,papple,pffox,call_type,*args):
     m=pm
     apple=papple
     ffox=pffox
-    print(ffox,call_type,*args)
+    # print(ffox,call_type,*args)
     c=m[82]<<16|m[83]
     for i in range(8):eta[i]=m[84+i]
     {-1:undo,0:click,1:born,2:ffox_click}[call_type](*args)
@@ -360,7 +361,7 @@ def pyvkcorecall(pm,papple,pffox,call_type,*args):
 def ffox_click(nm):
     global ffox,m,c
     c=c&0xffff00ff|nm<<8 #mou=nm&0xff
-    if ffox&1<<(((c>>8&0x7f)<<1)+(c>>15&1)) and c&0x7f==127 and m[c>>8&0x7f]>>14==(c>>31)+1:#if(ffox[mou]&&(tag==127(|255))&&m[mou]==t)first_set()
+    if ffox&1<<(((c>>8&0x7f)<<1)+(c>>15&1)) and c&0x7f==127 and m[c>>8&0x7f]>>14==(c>>31)+1:#if(ffox[mou]&&(tag==127(|255))&&m[mou]==t)first_click()
         if not m[c>>8&0x7f]&0x3e0:c&=0xffff7fff #if(m[mouse].up空)mouseUp=0
         reset()
         if m[c>>8&0x7f]>>(not not c&0x8000)*5&0x1f==11: #原理同[end_up],[start_up]
@@ -373,18 +374,18 @@ def ffox_click(nm):
         m[81]|=2 #co()
     else:
         m[81]=m[81]&16|1
-        if m[c>>8&0x7f]&0x3c00: #if(c[])second_set()
-            print("ffox second",ffox)
+        if m[c>>8&0x7f]&0x3c00: #if(c[])second_click()
+            # print("ffox second",ffox)
             # print("xor",2*(m[c&0x7f]&0x3e0==352),m[c&0x7f]&0x1f==11,2*(m[c&0x7f]&0x3e0==352)+(m[c&0x7f]&0x1f==11),c&0x7f,m[c&0x7f],m[c&0x7f]&0x1f,m[c&0x7f]&0x3e0)
             ffox^=(1<<(c>>7&1))<<((c&0x7f)<<1)
-            print(ffox)
+            # print(ffox)
             save_ffox_up=not c&0x80 and m[c&0x7f]&0x3e0==352 and ffox>>(((c&0x7f)<<1)+1)&1
-            print(save_ffox_up)
-            print(ffox)
-            second_set()
-            print(ffox)
+            # print(save_ffox_up)
+            # print(ffox)
+            second_click()
+            # print(ffox)
             if save_ffox_up and m[c>>8&0x7f]&0x3e0==352:ffox^=(2<<((c&0x7f)<<1))|(1<<((c>>8&0x7f)<<1)+1)
-            print(ffox)
+            # print(ffox)
             reset()
             if not ffox:
                 c^=0x80000000
@@ -393,7 +394,7 @@ def ffox_click(nm):
             c=c&0xffff0000|0x7f7f
             m[81]|=0x20
         else:
-            print("ffox reset")
+            # print("ffox reset")
             reset()
             c=c&0xffff0000|0x7f7f
     m[82]=c>>16&0xffff
@@ -410,9 +411,10 @@ def born(nm):
 
 def click(nm):
     global m,c
-    c=c&0xffff00ff|nm<<8 #mou=nm&0xff
+    setc("mouse,up",nm)
     if c&0x7f==127 and m[c>>8&0x7f]>>14==(c>>31)+1:#if((tag==127(|255))&&m[mou]==t)
-        first_set() #first_set()
+        first_click() #first_click()
+        setc("tag,up",nm)
         m[81]|=2 #co()
     else:
         m[81]=m[81]&16|1
@@ -428,8 +430,8 @@ def click(nm):
             if ffox:
                 c^=0x80000000
                 m[81]^=16
-        elif m[c>>8&0x7f]&0x3c00: #if(c[])second_set()
-            second_set()
+        elif m[c>>8&0x7f]&0x3c00: #if(c[])second_click()
+            second_click()
             reset()
             c^=0x80000000
             m[81]^=16
