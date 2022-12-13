@@ -332,14 +332,23 @@ def second_click():
             elif getm(76,"b")!=2 and not getm(76,"up"):setc("kmdlborn",1)
 
 def shot_poison():
-    global m,c
     end=getc("mouse")
     start=getc("tag")
-    if m[start]>>5&0x1f==14:
-        if whale(end):m[start]=0
-    c|=(m[start]>>5&0x1f==1)<<30
-    if poison_frog(end,start):m[start]&=0x3c00
-    if foot_turtle(end,start):m[end]&=0x3c00
+    if getm(start,"up")==14:
+        if whale(end):
+            setm(start,"b",0)
+            setm(start,"up",0)
+            setm(start,"down",0)
+    if getm(start,"up")==1:setc("kmdlborn",1)
+    if poison_frog(end,start):
+            setm(start,"b",0)
+            setm(start,"up",0)
+            setm(start,"down",0)
+    if foot_turtle(end,start):
+            setm(end,"b",0)
+            setm(end,"up",0)
+            setm(end,"down",0)
+    #born待改
     if c&0x40000000:
         if c&0x80000000:
             if (not m[4]&0x4000) and (not m[4]&0x3e0):m[81]|=4|c>>31<<3 #if(後手)if(*(m+4).b!=1 and *(m+4).up空)born()
