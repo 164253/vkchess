@@ -1,9 +1,9 @@
 import pygame
 from os.path import dirname
-from pyvk_core_v2 import pyvkcorecall
+from pyvk_core_v2 import pyvkcorecall,getm,getc,getc2
 def output():
     screen.blit(disp,(0,0))
-    if m[81]&2:
+    if getc2("c output"):
         y=dist_hi
         p=80 if ischange else 0
         k=-1 if ischange else 1
@@ -14,9 +14,9 @@ def output():
                 x+=bdone
                 p+=k
             y+=bdone
-        z=m[82]>>7&127
+        z=c>>23&127
         if z^127:screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImagep{}.png".format((m[z]>>13&1)+(m[z]>>11&1))).convert(),bdonet),(dist_wd+z%9*bdone,dist_hi+z//9*bdone))
-        z=m[82]&127
+        z=c>>16&127
         if z^127:screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImagep{}.png".format((m[z]>>13&1)+(m[z]>>11&1))).convert(),bdonet),(dist_wd+z%9*bdone,dist_hi+z//9*bdone))
     else:screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\boardline.png").convert(),(bdone*9,bdone*9)),(dist_wd,dist_hi))
     hbdonet=(bdone//2,bdone//2)
@@ -85,7 +85,7 @@ m=[
      0,     0,     0,     0,     0,     0,     0,     0,     0,
      0,     0,     0,     0,     0,     0,     0,     0,     0,
 0x400a,0x400a,0x400a,0x400a,0x400a,0x400a,0x400a,0x400a,0x400a,
-     0,0x4008,     0,     0,     0,     0,     0,0x4009,     0,
+     0,0x4008,     0,     0,     0,     0,0x4009,0x4009,     0,
 0x4006,0x4005,0x4004,0x4002,0x4001,0x4002,0x4004,0x4005,0x4007,
 0x21,0x3fff,0x7f7f,0,0,0,0,0,0,0,0]
 '''
@@ -103,9 +103,11 @@ for i,val in enumerate([
 0x21,0x3fff,0x7f7f,0,0,0,0,0,0,0,0]):
     m|=val<<(i<<16)
 '''
+c=0x3fff7f7f
 apple=1<<119|1<<123|1<<131|1<<135|1<<157|1<<165|1<<169
 ffox=0
-apple,ffox=pyvkcorecall(m,apple,ffox,0,9)
+eta=[0]*8
+m,c,apple,ffox,eta=pyvkcorecall(m,c,apple,ffox,eta,0,9)
 lm=[0]*88
 tm=[0]*88
 for i in range(88):lm[i]=m[i]
@@ -128,20 +130,20 @@ def depri():
         print()
     print()
 '''
-while m[81]&1:
-    if m[81]&4:
-        if m[81]&8^ischange:
+while getc2("keep game"):
+    if getc("born"):
+        if getc("t")^ischange:
             pygame.draw.line(screen,(0,0,0),[dist_wd-int(0.5*bdone),dist_hi-int(0.5*bdone)],[dist_wd+int(9.5*bdone),dist_hi-int(0.5*bdone)],linewd)
             pygame.draw.line(screen,(0,0,0),[dist_wd+int(9.5*bdone),dist_hi-int(1.5*bdone)],[dist_wd+int(9.5*bdone),dist_hi-int(0.5*bdone)],linewd)
             for i in range(1,11):
                 screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImage0_0_0.png").convert(),bdonet),(dist_wd+int((9.5-i)*bdone),dist_hi-int(1.5*bdone)))
-                screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImage{}_{}.png".format(i,(m[81]>>3&1)+1)).convert_alpha(),bdonet),(dist_wd+int((9.5-i)*bdone),dist_hi-int(1.5*bdone)))
+                screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImage{}_{}.png".format(i,getc("t")+1)).convert_alpha(),bdonet),(dist_wd+int((9.5-i)*bdone),dist_hi-int(1.5*bdone)))
         else:
             pygame.draw.line(screen,(0,0,0),[dist_wd-int(0.5*bdone),dist_hi+int(10.5*bdone)],[dist_wd+int(9.5*bdone),dist_hi+int(10.5*bdone)],linewd)
             pygame.draw.line(screen,(0,0,0),[dist_wd+int(9.5*bdone),dist_hi+int(9.5*bdone)],[dist_wd+int(9.5*bdone),dist_hi+int(10.5*bdone)],linewd)
             for i in range(1,11):
                 screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImage0_0_0.png").convert(),bdonet),(dist_wd+int((i-1.5)*bdone),dist_hi+int(9.5*bdone)))
-                screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImage{}_{}.png".format(i,(m[81]>>3&1)+1)).convert_alpha(),bdonet),(dist_wd+int((i-1.5)*bdone),dist_hi+int(9.5*bdone)))
+                screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\vkImage{}_{}.png".format(i,getc("t")+1)).convert_alpha(),bdonet),(dist_wd+int((i-1.5)*bdone),dist_hi+int(9.5*bdone)))
         pygame.display.update()
     event=pygame.event.wait()
     if event.type==pygame.QUIT:
@@ -152,30 +154,30 @@ while m[81]&1:
         if (-1.5*bdone+dist_wd<event.pos[0]<-0.5*bdone+dist_wd) and (8*bdone+dist_hi<event.pos[1]<9*bdone+dist_hi):
             # depri()
             for i in range(88):m[i],lm[i]=lm[i],m[i]
-            apple,ffox=pyvkcorecall(m,apple,ffox,-1,m)
+            m,c,apple,ffox,eta=pyvkcorecall(m,c,apple,ffox,-1,m,apple)
             # depri()
             output()
         elif (-1.5*bdone+dist_wd<event.pos[0]<-0.5*bdone+dist_wd) and (6.5*bdone+dist_hi<event.pos[1]<7.5*bdone+dist_hi):
             ischange=not ischange
             output()
         else:
-            if m[81]&4:
-                while m[81]&4:
+            if getc("born"):
+                while getc("born"):
                     if event.type==pygame.QUIT:
                         noquit=False
                         pygame.quit()
                         break
                     elif event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                        if m[81]&8^ischange:
+                        if getc("t")^ischange:
                             x=int(event.pos[0]-dist_wd+0.5*bdone)
                             y=int(event.pos[1]-dist_hi+1.5*bdone)
                             if 0<x and x<10*bdone and 0<y and y<bdone:
-                                apple,ffox=pyvkcorecall(m,apple,ffox,1,10-int(x//bdone))
+                                m,c,apple,ffox,eta=pyvkcorecall(m,c,apple,ffox,eta,1,10-int(x//bdone))
                         else:
                             x=int(event.pos[0]-dist_wd+0.5*bdone)
                             y=int(event.pos[1]-dist_hi-9.5*bdone)
                             if 0<x and x<10*bdone and 0<y and y<bdone:
-                                apple,ffox=pyvkcorecall(m,apple,ffox,1,1+int(x//bdone))
+                                m,c,apple,ffox,eta=pyvkcorecall(m,c,apple,ffox,eta,1,1+int(x//bdone))
                     event=pygame.event.wait()
             else:
                 for i in range(88):tm[i]=m[i]
@@ -184,17 +186,17 @@ while m[81]&1:
                 if x>=0 and x<bdwd and y>=0 and y<bdhi:
                     nm=x//bdone+y//bdone*9
                     if y%bdone<bdone//2:nm|=0x80
-                    if m[81]&16:nm^=0x80
+                    if getc("t"):nm^=0x80
                     if ischange:
                         nm=80-(nm&0x7f)
                         nm^=0x80
-                    apple,ffox=pyvkcorecall(m,apple,ffox,(ffox!=0)<<1,nm)
-                if m[81]&0x20:
+                    m,c,apple,ffox,eta=pyvkcorecall(m,c,apple,ffox,eta,(ffox!=0)<<1,nm)
+                if getc2("m change"):
                     for i in range(88):lm[i]=tm[i]
             output()
 if noquit:
     output()
-    if m[81]&16:
+    if getc("t"):
         screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\win.png").convert(),(bdone*3,bdone)),(dist_wd+3*bdone,dist_hi+int(9.5*bdone)))
         screen.blit(pygame.transform.scale(pygame.image.load(dir+"\\lose.png").convert(),(bdone*3,bdone)),(dist_wd+3*bdone,dist_hi-int(1.5*bdone)))
     else:
