@@ -1,18 +1,14 @@
-#12/13 0.1
+#12/18 0.1
 '''未完成
-get set 抽離改到shot poison
-還有select_chess也一堆迴圈要改
+先手青蛙南七北六 後手青蛙北七南二 先手青蛙西四進化會吃到第一個銅錢草 原理不明 以後再改
+select_chess一堆迴圈可縮短
 增加糧食危機
 增加鳳梨
+讓move j(epa) 從世上消失
 '''
 '''definition of structs and functions
 struct sMap{b:2,me:2,p:1,e:1,up:5,down:5}m[86]
-struct control{t:1,kmdlborn:1,zu:7,zd:7,mouse:8,tag:8}c #kmdlborn用不到了,sad
-/*註解略寫  #請使用ctrl+f自行搜尋
-[t差] t=目的地差值
-[end_up] whereUp=where(兩高用.up,一高用.down)
-[start_up] selfUp=self(兩高用.up,一高用.down)
-[w鱷龜] if(w無鱷龜)=1 elif同直行=1 else 0
+struct control{t:1,born:1,zu:7,zd:7,mouse:8,tag:8}c
 '''
 getm=lambda pos,type:m[pos]>>{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10,"have chess":0}[type]&{"b":3,"me":3,"p":1,"e":1,"up":0x1f,"down":0x1f,"c":0xf,"have chess":0x3ff}[type]
 # getm=lambda pos,type:m>>(pos<<4)>>{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10,"have chess":0}[type]&{"b":3,"me":3,"p":1,"e":1,"up":0x1f,"down":0x1f,"c":0xf,"have chess":0x3ff}[type]
@@ -20,12 +16,17 @@ def setm(pos,type,value):
     global m
     m[pos]=m[pos]&{"b":0x3fff,"me":0xcfff,"p":0xf7ff,"e":0xfbff,"up":0xfc1f,"down":0xffe0,"c":0xc3ff}[type]|value<<{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10}[type]
     # m=m&{"b":0x3fff,"me":0xcfff,"p":0xf7ff,"e":0xfbff,"up":0xfc1f,"down":0xffe0,"c":0xc3ff}[type]<<(pos<<4)|value<<{"b":14,"me":12,"p":11,"e":10,"up":5,"down":0,"c":10}[type]<<(pos<<4)
-getc=lambda type:c>>{"t":31,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0}[type]&{"t":1,"zu":0x7f,"zd":0x7f,"mouseup":1,"mouse":0x7f,"tagup":1,"tag":0x7f}[type]
+getc=lambda type:c>>{"t":31,"born":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]&{"t":1,"born":1,"zu":0x7f,"zd":0x7f,"mouseup":1,"mouse":0x7f,"tagup":1,"tag":0x7f,"mouse,up":0xff,"tag,up":0xff}[type]
 # getc=lambda type:c>>{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0}[type]&{"t":1,"zu":0x7f,"zd":0x7f,"mouseup":1,"mouse":0x7f,"tagup":1,"tag":0x7f}[type]
 def setc(type,value):
     global c
-    c=c&{"t":0x7fffffff,"zu":0xc07fffff,"zd":0xff80ffff,"mouseup":0xffff7fff,"mouse":0xffff80ff,"tagup":0xffffff7f,"tag":0xffffff80,"mouse,up":0xffff00ff,"tag,up":0xffffff00}[type]|value<<{"t":31,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
+    c=c&{"t":0x7fffffff,"born":0xbfffffff,"zu":0xc07fffff,"zd":0xff80ffff,"mouseup":0xffff7fff,"mouse":0xffff80ff,"tagup":0xffffff7f,"tag":0xffffff80,"mouse,up":0xffff00ff,"tag,up":0xffffff00}[type]|value<<{"t":31,"born":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
     # c=c&{"t":0x3fffffff,"zu":0x407fffff,"zd":0x7f80ffff,"mouseup":0x7fff7fff,"mouse":0x7fff80ff,"tagup":0x7fffff7f,"tag":0x7fffff80,"mouse,up":0x7fff00ff,"tag,up":0x7fffff00}[type]|value<<{"t":30,"zu":23,"zd":16,"mouseup":15,"mouse":8,"tagup":7,"tag":0,"mouse,up":8,"tag,up":0}[type]
+getc2=lambda type:c2>>{"m change":2,"c output":1,"keep game":0}[type]&1
+def setc2(type,value):
+    global c2
+    c2=c2&{"m change":0x3,"c output":0x5,"keep game":0x6}[type]|value<<{"m change":2,"c output":1,"keep game":0}[type]
+# return{0x2000 ismchange,l:8,&16 t(c>>31),&8 t(when bo),&4 bo,&2 co,&1 keep game}
 geteta=lambda pos:eta[pos]&0xff
 # geteta=lambda pos:eta>>(pos<<3)&0xff
 def seteta(pos,value):
@@ -39,6 +40,7 @@ def setapple(pos,value):
     # apple=(apple^getapple(pos)<<2*pos)|value<<2*pos
 m=0
 c=0
+c2=0
 eta=[0]*8
 apple=0
 ffox=0
@@ -49,7 +51,7 @@ ffox=0
 def reset():
     for i in range(8):seteta(i,0)
     for i in range(81):setm(i,"c",0)
-    for type,value in (("t",0),("zu",0x7f),("zd",0x7f)):setc(type,value)
+    for type,value in (("zu",0x7f),("zd",0x7f)):setc(type,value)
 
 def move_limit(end,start):
     pos,dcol,scol=end-start,(end-start)%9,start%9 #dcol=差值(delta)column,scol=start column
@@ -78,7 +80,6 @@ def move(end,start,epa): #e=evolution p=ispoison a=whichEta #return &1keep &2p &
     global m,c,eta
     mou=getc("mouse")
     if move_limit(end,start):
-        print(getm(end,"b"),getc("t"))
         if getm(end,"b")==2-getc("t"): #敵人 #吃人無論如何都是return 0
             if foot_turtle(end,mou):
                 ap=ap_pos(end)+ap_pos(start)>>1
@@ -241,7 +242,6 @@ def select_chess(who):
         if who==10:who=4
         elif who==11:who=5
         elif 12<who<17:who=1
-        print(r[who-1])
         for ir in r[who-1]:
             for x,epa in l[ir[0]:ir[1]]:move(s+x,s,epa)
 
@@ -278,7 +278,7 @@ def to_penguin():
 def how_many_kmdl(turn):
     turn+=1
     for i in range(81):
-        if getm(i,"b")==turn and (getm(i,"up")==1 or getm(i,"up")==32):return 1
+        if getm(i,"b")==turn and (getm(i,"up")==1 or getm(i,"down")==1):return 1
     return 0
 
 def second_click():
@@ -286,7 +286,7 @@ def second_click():
     end=getc("mouse")
     start=getc("tag")
     tu=getm(start,"up" if getm(start,"up") else "down")
-    td=getm(start,"down")
+    td=getm(start,"up" if getc("tagup") else "down")
     t=getc("t")
     if tu==14 or tu==5 and getm(end,"e"):setm(end,"p",whale(end))
     if td==17: #鬣蜥
@@ -301,7 +301,7 @@ def second_click():
                 setm(start,"down",0)
         to_penguin() #to pen
     else:
-        if getm(end,"e"):apple^=eta[which_eta(td,end-start)]&((1<<1+ap_pos(max(start,end)))-1^(1<<1+ap_pos(min(start,end)))-1) #appleDel 
+        if getm(end,"e"):apple^=eta[which_eta(td,end-start)]&apple&((1<<1+ap_pos(max(start,end)))-1^(1<<1+ap_pos(min(start,end)))-1) #apple_del
         if getm(end,"me")==2: #吃
             if poison_frog(end,start):
                 setm(end,"b",0)
@@ -311,9 +311,9 @@ def second_click():
                 setm(end,"b",t+1)
                 setm(end,"down",td)
                 if getm(start,"up") and not getc("tagup"):setm(end,"up",tu)
-        elif getm(end,"b"):sstm(end,"up",tu)
+        elif getm(end,"b"):setm(end,"up",tu)
         else:
-            setm(end,"up",t+1)
+            setm(end,"b",t+1)
             setm(end,"down",td)
             if getm(start,"up") and not getc("tagup"):setm(end,"up",tu)
         if getm(end,"e") and 1<tu<11:setm(end,"up" if getm(end,"up") else "down",tu+9)
@@ -328,8 +328,8 @@ def second_click():
         to_penguin()
         if tu==1 and (getm(end,"me")==2 or getm(end,"e")):
             if t: #if(後手)
-                if getm(4,"b")!=1 and not getm(4,"up"):setc("kmdlborn",1)
-            elif getm(76,"b")!=2 and not getm(76,"up"):setc("kmdlborn",1)
+                if getm(4,"b")!=1 and not getm(4,"up"):setc("born",1)
+            elif getm(76,"b")!=2 and not getm(76,"up"):setc("born",1)
 
 def shot_poison():
     end=getc("mouse")
@@ -339,7 +339,7 @@ def shot_poison():
             setm(start,"b",0)
             setm(start,"up",0)
             setm(start,"down",0)
-    if getm(start,"up")==1:setc("kmdlborn",1)
+    kmdlborn=1
     if poison_frog(end,start):
             setm(start,"b",0)
             setm(start,"up",0)
@@ -349,33 +349,30 @@ def shot_poison():
             setm(end,"up",0)
             setm(end,"down",0)
     #born待改
-    if c&0x40000000:
-        if c&0x80000000:
-            if (not m[4]&0x4000) and (not m[4]&0x3e0):m[81]|=4|c>>31<<3 #if(後手)if(*(m+4).b!=1 and *(m+4).up空)born()
-        elif (not m[76]&0x8000) and (not m[76]&0x3e0):m[81]|=4|c>>31<<3 #if(後手)if(*(m+4).b!=1 and *(m+4).up空)born()
-    c&=0xbfffffff
+    if kmdlborn:
+        if getc("t"):
+            if not getm(4,"b")==1 and not getm(4,"up"):setc("born",1)
+        elif not getm(76,"b")==2 and not getm(76,"up"):setc("born",1)
 
 def ffox_calculate():
-    global ffox,m
-    for i in range(81):ffox|=((m[i]&0x3e0==352 and m[i]>>14==2-(c>>31))<<1|(m[i]&0x1f==11 and m[i]>>14==2-(c>>31)))<<(i<<1)
+    global ffox
+    for i in range(81):ffox|=((getm(i,"up")==11 and getm(i,"b")==2-getc("t"))<<1|(getm(i,"down")==11 and getm(i,"b")==2-getc("t")))<<(i<<1)
 
 '''
 call_type
 -1 undo
 0 click(nm)
 1 born()
-
 '''
-def pyvkcorecall(pm,papple,pffox,call_type,*args):
+def pyvkcorecall(pm,pc,papple,pffox,peta,call_type,*args):
     global m,c,eta,apple,ffox
     m=pm
+    c=pc
     apple=papple
     ffox=pffox
-    # print(ffox,call_type,*args)
-    c=m[82]<<16|m[83]
-    for i in range(8):eta[i]=m[84+i]
+    eta=peta
     {-1:undo,0:click,1:born,2:ffox_click}[call_type](*args)
-    return apple,ffox
+    return m,c,apple,ffox,eta
 
 def ffox_click(nm):
     global ffox,m,c
@@ -390,84 +387,65 @@ def ffox_click(nm):
             move(s+8,s,5)
             move(s+10,s,7)
             c=c^(c&0xff)|(c>>8&0xff) #tag(Up)=mouse(Up)
-        m[81]|=2 #co()
+        setc2("c output",1)
     else:
-        m[81]=m[81]&16|1
         if m[c>>8&0x7f]&0x3c00: #if(c[])second_click()
-            # print("ffox second",ffox)
-            # print("xor",2*(m[c&0x7f]&0x3e0==352),m[c&0x7f]&0x1f==11,2*(m[c&0x7f]&0x3e0==352)+(m[c&0x7f]&0x1f==11),c&0x7f,m[c&0x7f],m[c&0x7f]&0x1f,m[c&0x7f]&0x3e0)
             ffox^=(1<<(c>>7&1))<<((c&0x7f)<<1)
-            # print(ffox)
             save_ffox_up=not c&0x80 and m[c&0x7f]&0x3e0==352 and ffox>>(((c&0x7f)<<1)+1)&1
-            # print(save_ffox_up)
-            # print(ffox)
             second_click()
-            # print(ffox)
             if save_ffox_up and m[c>>8&0x7f]&0x3e0==352:ffox^=(2<<((c&0x7f)<<1))|(1<<((c>>8&0x7f)<<1)+1)
-            # print(ffox)
             reset()
             if not ffox:
                 c^=0x80000000
-                m[81]^=16
-            if not (how_many_kmdl(c>>31) and how_many_kmdl(not c>>31)):m[81]=(m[81]&30)|(m[81]>>2 and not how_many_kmdl(not c>>31))
+            if not (how_many_kmdl(c>>31) and how_many_kmdl(not c>>31)):setc2("keep game",getc("born") and not how_many_kmdl(not getc("t")))
             c=c&0xffff0000|0x7f7f
-            m[81]|=0x20
+            setc2("m change",1)
         else:
-            # print("ffox reset")
             reset()
             c=c&0xffff0000|0x7f7f
-    m[82]=c>>16&0xffff
-    m[83]=c&0xffff
-    for i in range(8):m[84+i]=eta[i]
 
 def born(nm):
-    global m
-    home=4 if m[81]&8 else 76
-    m[home]|=nm<<(not not m[home])*5|(0x8000 if m[81]&8 else 0x4000)
-    m[81]&=0x1ff3
-    if not how_many_kmdl(m[81]>>3&1):m[81]&=0x1ffe
-    m[81]|=0x2000
+    t=getc("t")
+    home=4 if t else 76
+    setm(home,"up" if getm(home,"have chess") else "down",nm)
+    setm(home,"b",t+1)
+    setc("born",0)
+    if not how_many_kmdl(t):setc2("keep game",0)
+    setc2("m change",1)
+    setc("t",getc("t")^1)
 
 def click(nm):
-    global m,c
     setc("mouse,up",nm)
-    if c&0x7f==127 and m[c>>8&0x7f]>>14==(c>>31)+1:#if((tag==127(|255))&&m[mou]==t)
-        first_click() #first_click()
-        setc("tag,up",nm)
-        m[81]|=2 #co()
+    if getc("tag")==127 and getm(getc("mouse"),"b")==getc("t")+1:
+        first_click()
+        setc("tag,up",getc("mouse,up"))
+        setc2("c output",1)
     else:
-        m[81]=m[81]&16|1
-        if (c>>8&0x7f!=127 and ((c>>8&0x7f==c>>23&0x7f) or (c>>8&0x7f==c>>16&0x7f))) and (c&0x8000^c>>16&0x8000 or not m[c>>8&0x7f]&0x3c00): #if((mou!=127 and ((mou==zu) or (mou==zd)))  and  (mouUp or !m[mou].mepe))
+        setc2("keep game",1)
+        if getc("mouse")!=127 and (getc("mouse")==getc("zu") or getc("mouse")==getc("zd")) and (getc("mouseup") or not getm(getc("mouse"),"c")):
             shot_poison()
             reset()
-            c^=0x80000000
-            m[81]^=16
-            if not (how_many_kmdl(c>>31) and how_many_kmdl(not c>>31)):m[81]=(m[81]&30)|(m[81]>>2 and not how_many_kmdl(not c>>31))
-            c=c&0xffffff00|0x7f
-            m[81]|=0x20
+            setc("t",getc("t")^1)
+            if not (how_many_kmdl(getc("t")) and how_many_kmdl(not getc("t"))):setc2("keep game",getc("born") and not how_many_kmdl(not getc("t")))
+            setc("tag",127)
+            setc2("m change",1)
             ffox_calculate()
             if ffox:
-                c^=0x80000000
-                m[81]^=16
-        elif m[c>>8&0x7f]&0x3c00: #if(c[])second_click()
+                setc("t",getc("t")^1)
+        elif getm(getc("mouse"),"c"):
             second_click()
             reset()
-            c^=0x80000000
-            m[81]^=16
-            if not (how_many_kmdl(c>>31) and how_many_kmdl(not c>>31)):m[81]=(m[81]&30)|(m[81]>>2 and not how_many_kmdl(not c>>31))
-            c=c&0xffff0000|0x7f7f
-            m[81]|=0x20
+            if not getc("born"):setc("t",getc("t")^1)
+            if not (how_many_kmdl(getc("t")) and how_many_kmdl(not getc("t"))):setc2("keep game",getc("born") and not how_many_kmdl(not getc("t")))
+            setc("mouse",127)
+            setc("tag",127)
+            setc2("m change",1)
             ffox_calculate()
-            if ffox:
-                c^=0x80000000
-                m[81]^=16
+            if ffox:setc("t",getc("t")^1)
         else:
             reset()
-            c=c&0xffff0000|0x7f7f
-    m[82]=c>>16&0xffff
-    m[83]=c&0xffff
-    for i in range(8):m[84+i]=eta[i]
-    # return m
+            setc("mouse",127)
+            setc("tag",127)
 
 def undo(pm,papple):
     global m,ffox,apple
@@ -475,11 +453,4 @@ def undo(pm,papple):
     ffox=0
     apple=papple
     reset()
-    m[81]&=0x1ffd
-    m[83]=m[83]&0xff00|0x7f7f
-'''
-struct control{t:1,kmdlborn:1,zu:7,zd:7,mouse:8,tag:8}c #kmdlborn用不到了,sad
-'''
-#*(m+81) dll return{0x20 ismchange,0x10 t(c>>31),&8 t(when bo),&4 bo,&2 co,&1 keep game}
-#*(m+82){c:高16}
-#*(m+83){c:低16}
+    setc2("c output",0)
